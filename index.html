@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LexTime — Offline Legal Practice & Client Money</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f1f5f9;color:#1e293b;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.flex{display:flex}.wrap{flex-wrap:wrap}.col{flex-direction:column}.center{align-items:center}.between{justify-content:space-between}.grow{flex:1}.gap1{gap:4px}.gap2{gap:8px}.gap3{gap:12px}.gap4{gap:16px}
+.mb2{margin-bottom:8px}.mb4{margin-bottom:16px}.mb6{margin-bottom:24px}.mt4{margin-top:16px}.mt6{margin-top:24px}
+#splash{position:fixed;inset:0;z-index:200;background:#020617;display:flex;align-items:center;justify-content:center;text-align:center}
+#splash .logo{width:64px;height:64px;margin:0 auto 16px;border-radius:16px;background:rgba(251,191,36,.1);display:flex;align-items:center;justify-content:center}
+#splash h1{color:#fff;font-size:20px}
+#splash p{color:#94a3b8;font-size:14px;margin-top:8px}
+#lockScreen{position:fixed;inset:0;z-index:50;background:#020617;display:flex;align-items:center;justify-content:center;padding:16px}
+.lockbox{width:100%;max-width:420px;background:#fff;border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,.4);padding:32px}
+#pinDots{display:flex;justify-content:center;gap:12px;margin:28px 0}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid #cbd5e1}
+#keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#keypad button{height:56px;border-radius:12px;background:#f1f5f9;border:0;font-weight:700;font-size:18px}
+#keypad button:hover{background:#e2e8f0}
+#lockMessage{text-align:center;font-size:12px;color:#dc2626;height:16px;margin-top:16px}
+.app{display:flex;min-height:100vh}
+.sidebar{width:64px;background:#0f172a;color:#cbd5e1;display:flex;flex-direction:column;flex-shrink:0}
+@media(min-width:1024px){.sidebar{width:288px}}
+.sidebar .brand{display:flex;align-items:center;gap:12px;padding:0 16px;height:64px;border-bottom:1px solid #1e293b}
+.sidebar .brand .logo{width:36px;height:36px;border-radius:12px;background:rgba(251,191,36,.1);display:flex;align-items:center;justify-content:center}
+.sidebar .brand .title{display:none}
+@media(min-width:1024px){.sidebar .brand .title{display:block}.sidebar .brand .title b{color:#fff;font-size:14px;display:block}.sidebar .brand .title span{font-size:11px;color:#64748b}}
+.nav{flex:1;overflow-y:auto;padding:16px 8px;display:flex;flex-direction:column;gap:4px}
+.nav button{width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;background:transparent;border:0;text-align:left;font-size:14px;color:#cbd5e1}
+.nav button:hover{background:rgba(30,41,59,.6);color:#fff}
+.nav button.active{background:#1e293b;color:#fff;font-weight:600;border-left:2px solid #fbbf24}
+.nav .ilabel{display:none}
+@media(min-width:1024px){.nav .ilabel{display:inline}}
+.sidebar .foot{padding:12px;border-top:1px solid #1e293b}
+.content{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;gap:16px}
+.topbar h2{font-size:18px;font-weight:700}
+.topbar .sub{font-size:12px;color:#94a3b8;display:none}
+@media(min-width:768px){.topbar .sub{display:block}}
+.chip-timer{display:flex;align-items:center;gap:8px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600}
+.dotred{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.main{flex:1;overflow-y:auto;padding:32px}
+.pagehead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.pagehead h1{font-size:20px;font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;padding:10px 16px;font-size:14px;font-weight:600;border:1px solid transparent;transition:background .15s}
+.btn-dark{background:#0f172a;color:#fff}.btn-dark:hover{background:#1e293b}
+.btn-light{background:#fff;border-color:#cbd5e1;color:#334155}.btn-light:hover{border-color:#94a3b8}
+.btn-green{background:#059669;color:#fff}.btn-green:hover{background:#10b981}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.cardhead{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f1f5f9;font-weight:700}
+.cardbody{padding:20px}
+.grid{display:grid;gap:16px}
+.g1{grid-template-columns:repeat(1,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:1024px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.g2,.g4,.g3{grid-template-columns:1fr}}
+.stat{padding:20px}
+.stat .lbl{font-size:12px;font-weight:500;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
+.stat .val{font-size:24px;font-weight:800;margin-top:8px}
+.stat .subv{font-size:12px;color:#94a3b8;margin-top:4px}
+.stat .ico{width:40px;height:40px;border-radius:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.input,.select,.textarea{width:100%;border:1px solid #cbd5e1;border-radius:12px;padding:10px 14px;font-size:14px;background:#fff;outline:none}
+.input:focus,.select:focus,.textarea:focus{border-color:#94a3b8;box-shadow:0 0 0 3px rgba(15,23,42,.08)}
+.select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#64748b 50%),linear-gradient(135deg,#64748b 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}
+.textarea{resize:none;min-height:80px}
+table.tbl{width:100%;font-size:14px;border-collapse:collapse}
+.tbl th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;font-weight:600;padding:12px 16px;border-bottom:1px solid #f1f5f9}
+.tbl td{padding:12px 16px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.tbl tr:hover td{background:#f8fafc}
+.tbl .r{text-align:right}.tbl .c{text-align:center}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.chip-green{background:#d1fae5;color:#047857}.chip-blue{background:#dbeafe;color:#1d4ed8}.chip-amber{background:#fef3c7;color:#b45309}.chip-gray{background:#f1f5f9;color:#475569}.chip-red{background:#fee2e2;color:#b91c1c}
+.rowline{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #f1f5f9}
+.rowline:last-child{border-bottom:0}
+.mono{font-variant-numeric:tabular-nums}
+.avatar{width:44px;height:44px;border-radius:12px;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.empty{padding:56px 0;text-align:center;color:#94a3b8}
+.empty .eico{width:48px;height:48px;border-radius:16px;background:#f1f5f9;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.modal-ov{position:fixed;inset:0;z-index:90;background:rgba(2,6,23,.6);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
+.modal{background:#fff;border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,.3);width:100%;max-width:560px;margin:32px 0}
+.modal.wide{max-width:900px}
+.modalhead{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #f1f5f9}
+.modalhead h3{font-size:18px;font-weight:700}
+.modalhead .msub{font-size:14px;color:#94a3b8;margin-top:2px}
+.modalbody{padding:24px}
+.modalfoot{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid #f1f5f9}
+.iconbtn{background:transparent;border:0;border-radius:8px;padding:6px;color:#94a3b8}
+.iconbtn:hover{background:#f1f5f9;color:#334155}
+#toasts{position:fixed;top:16px;right:16px;z-index:100;display:flex;flex-direction:column;gap:8px;width:320px;max-width:calc(100vw - 32px)}
+.toast{padding:12px 16px;border-radius:12px;color:#fff;font-size:14px;box-shadow:0 10px 25px rgba(0,0,0,.2);display:flex;gap:8px;align-items:flex-start}
+.toast.ok{background:#059669}.toast.err{background:#dc2626}.toast.warn{background:#d97706}.toast.info{background:#1e293b}
+.bar{height:10px;background:#f1f5f9;border-radius:999px;overflow:hidden}
+.bar>div{height:100%;background:#0f172a;border-radius:999px}
+.bar.red>div{background:#ef4444}.bar.em>div{background:#10b981}
+details.summaryrow>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0}
+details.summaryrow>summary::-webkit-details-marker{display:none}
+pre.dump{white-space:pre-wrap;word-break:break-word;background:#f8fafc;border-radius:8px;padding:8px;font-size:12px;color:#475569}
+.invoice{padding:32px 48px}
+.invoice h2{font-size:20px;font-weight:800}
+.invoice .muted{color:#64748b;font-size:14px}
+.invoice .small{font-size:12px;color:#94a3b8}
+@media print{.sidebar,.topbar,.pagehead,.modal-ov,#toasts,#splash{display:none!important}.main{padding:0}.card{border:0;box-shadow:none}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+
+<div id="splash"><div><div class="logo"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l7 3 7-3M5 7l-2 8a4 4 0 0 0 8 0l-2-8M19 7l-2 8a4 4 0 0 0 8 0l-2-8"/></svg></div><h1>LexTime</h1><p id="splashStatus">Starting…</p></div></div>
+
+<div id="lockScreen" class="hidden"><div class="lockbox">
+  <div style="text-align:center"><div style="width:56px;height:56px;border-radius:16px;background:#0f172a;margin:0 auto 16px;display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l7 3 7-3M5 7l-2 8a4 4 0 0 0 8 0l-2-8M19 7l-2 8a4 4 0 0 0 8 0l-2-8"/></svg></div><h1 style="font-size:20px;font-weight:700">LexTime</h1><p id="lockSubtitle" style="font-size:14px;color:#64748b;margin-top:4px">Enter your PIN to continue</p></div>
+  <div id="pinDots"></div><div id="keypad"></div><p id="lockMessage"></p>
+  <button class="btn btn-light" style="width:100%;justify-content:center;margin-top:12px" onclick="openWorkspaceFile()">${icon('upload','sm')} Open workspace file…</button>
+</div></div>
+
+<div id="appShell" class="hidden"><div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l7 3 7-3M5 7l-2 8a4 4 0 0 0 8 0l-2-8M19 7l-2 8a4 4 0 0 0 8 0l-2-8"/></svg></div><div class="title"><b>LexTime</b><span>Offline Practice &amp; Client Money</span></div></div>
+    <nav id="navList" class="nav"></nav>
+    <div class="foot"><button onclick="relock()" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;background:transparent;border:0;color:#cbd5e1;font-size:14px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4"/></svg><span class="ilabel">Lock</span></button></div>
+  </aside>
+  <div class="content"><header id="topbar" class="topbar"></header><main id="main" class="main"></main></div>
+</div></div>
+
+<div id="modalRoot"></div><div id="toasts"></div>
+
+<script>
+'use strict';
+
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+const round2 = n => Math.round((+n || 0)*100)/100;
+const clamp = (n,a,b)=>Math.min(b,Math.max(a,n));
+
+function curCode(){ const s=db&&db.settings; const c=(s&&s.country)||'IN'; if(c==='US')return 'USD'; if(c==='GB')return 'GBP'; return (s&&s.customCurrency)||'INR'; }
+const fmtINR = n => { try{ return new Intl.NumberFormat('en-IN',{style:'currency',currency:curCode(),maximumFractionDigits:2}).format(+n || 0); }catch(e){ return (+n||0).toFixed(2); } };
+const fmtNum  = n => new Intl.NumberFormat('en-IN',{maximumFractionDigits:2}).format(+n || 0);
+
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const fmtDate = iso => { if(!iso) return '—'; const d=new Date(iso); return isNaN(d) ? '—' : d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); };
+const todayISO = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const nowISO = () => new Date().toISOString();
+function addDaysISO(iso, days){ const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+days); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function minsToHM(m){ m=Math.max(0,Math.round(m)); return `${Math.floor(m/60)}h ${String(m%60).padStart(2,'0')}m`; }
+function msToHMS(ms){ const s=Math.max(0,Math.floor(ms/1000)); const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
+
+const ICONS = {
+ home:'M3 12l9-9 9 9v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+ users:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm14 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+ briefcase:'M3 7h18v13H3zM8 7V4h8v3m-4 6v2',
+ timer:'M12 8v4l2 2m-2 6a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM9 2h6',
+ clock:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 5v5l3 2',
+ receipt:'M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2zM8 7h8M8 11h8M8 15h5',
+ 'file-text':'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M16 13H8M16 17H8',
+ 'credit-card':'M3 5h18v14H3zM3 10h18',
+ 'bar-chart-2':'M18 20V10M12 20V4M6 20v-6',
+ database:'M12 2c4 0 7 1.8 7 4v12c0 2.2-3 4-7 4s-7-1.8-7-4V6c0-2.2 3-4 7-4zm-7 4c0 2.2 3 4 7 4s7-1.8 7-4M5 12c0 2.2 3 4 7 4s7-1.8 7-4',
+ settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm7.4-3a7.4 7.4 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7.3 7.3 0 0 0-2-1.2L14.5 3h-4l-.4 2.6a7.3 7.3 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0-.1 1.2 7.4 7.4 0 0 0 .1 1.2l-2 1.6 2 3.4 2.4-1a7.3 7.3 0 0 0 2 1.2l.4 2.6h4l.4-2.6a7.3 7.3 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z',
+ plus:'M12 5v14M5 12h14', pencil:'M17 3l4 4L7 21H3v-4z',
+ 'trash-2':'M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6',
+ x:'M18 6L6 18M6 6l12 12', search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm10 2l-4.35-4.35',
+ check:'M20 6L9 17l-5-5', play:'M5 3l14 9-14 9z', pause:'M6 4h4v16H6zM14 4h4v16h-4z',
+ save:'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8',
+ 'stop-circle':'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9 9h6v6H9z',
+ lock:'M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4',
+ scale:'M12 3v18M5 7l7 3 7-3M5 7l-2 8a4 4 0 0 0 8 0l-2-8M19 7l-2 8a4 4 0 0 0 8 0l-2-8',
+ 'shield-check':'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zm-5-10l3 3 5-6',
+ wallet:'M3 7h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 7l1-3h15M16 14h2',
+ 'alert-triangle':'M12 3L2 20h20zM12 9v5m0 3h.01', calendar:'M8 2v4M16 2v4M3 8h18v12H3zM3 12h18',
+ 'user-plus':'M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm13 2h-6m3 3v-6',
+ 'book-open':'M12 7c-2-2-5-3-9-3v14c4 0 7 1 9 3 2-2 5-3 9-3V4c-4 0-7 1-9 3zm0 0v14',
+ eye:'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8zm11 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+ banknote:'M2 6h20v12H2zM2 10h4a2 2 0 0 1 0 4H2m16 0h4M6 12h.01M18 12h.01',
+ 'x-circle':'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm-5-5l10-10M7 7l10 10',
+ 'arrow-left':'M19 12H5m6-7l-7 7 7 7', 'arrow-up-right':'M7 17L17 7M7 7h10v10',
+ 'refresh-cw':'M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.65 4.36A9 9 0 0 0 20.5 15',
+ mail:'M4 4h16v16H4zM22 6l-10 7L2 6', phone:'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2z',
+ 'map-pin':'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0zm-9 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+ download:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
+ upload:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12',
+ 'key-round':'M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4',
+ 'flask-conical':'M10 2v7.3L4.5 20a1.7 1.7 0 0 0 1.5 2.5h12a1.7 1.7 0 0 0 1.5-2.5L14 9.3V2M8.5 2h7M7 15h10',
+ 'check-circle-2':'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm-5-10l3 3 6-6',
+ info:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-12v6m0-10h.01',
+ 'alert-circle':'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-14v4m0 4h.01',
+ 'file-plus-2':'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 11v6M9 14h6',
+ 'file-down':'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 12v6m-3-3l3 3 3-3',
+ 'edit-3':'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+ delete:'M3 6h18M8 6V4h8v2m1 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6',
+ landmark:'M3 18h18M4 13h16M5 13V8m4 5V8m6 5V8m4 5V8M3 21h18M12 3L2 8h20z',
+ 'arrow-left-right':'M8 3L4 7l4 4M4 7h16M16 21l4-4-4-4m4 4H4',
+ percent:'M19 5L5 19M7 7h.01M17 17h.01'
+};
+function icon(name, cls){
+  const path = ICONS[name] || 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z';
+  const size = cls==='lg' ? 26 : cls==='sm' ? 15 : 18;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="${path}"/></svg>`;
+}
+
+function toast(msg, type){
+  const cls = type==='error' ? 'err' : type==='warn' ? 'warn' : type==='info' ? 'info' : 'ok';
+  const el = document.createElement('div');
+  el.className = 'toast '+cls;
+  const ic = type==='error' ? 'alert-circle' : type==='warn' ? 'alert-triangle' : type==='info' ? 'info' : 'check-circle-2';
+  el.innerHTML = icon(ic,'sm') + `<span>${esc(msg)}</span>`;
+  $('#toasts').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .4s'; setTimeout(()=>el.remove(),400); }, 4200);
+}
+
+function juris(){
+  const s=db.settings, c=(s.country)||'IN';
+  const B = {
+    IN:{code:'IN', solicitorLabel:'Advocate', taxLabel:'GST', taxNoLabel:'GSTIN', currency:'INR', rates:[0,5,12,18,28], modes:[{id:'cgst',label:'CGST + SGST'},{id:'igst',label:'IGST'}], defRate:18, defMode:'cgst', statePick:true, taxDefault:true, clientReg:'Client cash is held in a bank account separate from office money; only earned fees and reimbursements are transferred out.'},
+    US:{code:'US', solicitorLabel:'Attorney', taxLabel:'Sales tax', taxNoLabel:'EIN', currency:'USD', rates:[0], modes:[{id:'none',label:'No tax'}], defRate:0, defMode:'none', statePick:false, taxDefault:false, clientReg:'Client funds are treated as trust funds (IOLTA-style safeguards): they are recorded on the client ledger and never mixed with office money.'},
+    GB:{code:'GB', solicitorLabel:'Solicitor', taxLabel:'VAT', taxNoLabel:'VAT No.', currency:'GBP', rates:[0,5,20], modes:[{id:'vat',label:'VAT'}], defRate:20, defMode:'vat', statePick:false, taxDefault:true, clientReg:'SAR: client money must be held in a separate client bank account; it is credited to the client ledger and only transferred to the office account once fees are earned.'}
+  };
+  if(B[c]) return B[c];
+  return {code:'OTHER', solicitorLabel:s.customSolicitorLabel||'Solicitor', taxLabel:s.customTaxLabel||'Tax', taxNoLabel:s.customTaxNoLabel||'Tax No.', currency:s.customCurrency||'INR', rates:[0,5,10,18], modes:[{id:'flat',label:(s.customTaxLabel||'Tax')}], defRate:0, defMode:'flat', statePick:false, taxDefault:false, clientReg:'Client funds are recorded in a segregated client ledger with a matching bank movement.'};
+}
+const solLabel = () => juris().solicitorLabel;
+const taxOn = () => !!(db.settings.taxEnabled);
+const clientMoneyOn = () => db.settings.clientMoneyEnabled !== false;
+
+function splashStatus(msg){ const s=$('#splashStatus'); if(s) s.textContent = msg; }
+function hideSplash(){ const sp=$('#splash'); if(sp) sp.remove(); }
+
+const memStore = {};
+const storeGet = k => { try { return localStorage.getItem(k); } catch(e){ return Object.prototype.hasOwnProperty.call(memStore,k) ? memStore[k] : null; } };
+const storeSet = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} memStore[k]=v; };
+
+function cyrb53(str, seed){
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for(let i=0;i<str.length;i++){
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507); h1 ^= Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507); h2 ^= Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return 4294967296*(2097151&h2)+(h1>>>0);
+}
+const pinHash = pin => cyrb53('solbill::'+pin, 20260).toString(36);
+
+const DB_KEY='lexbill_db_v1', META_KEY='lexbill_meta_v1';
+function defaultDB(){
+  return { version:2, createdAt:nowISO(), settings:{ firmName:'Your Law Firm', firmAddress:'', firmGstin:'', firmEmail:'', firmPhone:'', firmState:'JK', solicitors:[], pinHash:'', pinLength:6, country:'IN', customSolicitorLabel:'', customTaxLabel:'', customTaxNoLabel:'', customCurrency:'', taxEnabled:true, clientMoneyEnabled:true }, seq:{ invoice:1, receipt:1, journal:1 }, clients:[], matters:[], timeEntries:[], expenses:[], invoices:[], auditLog:[], ledgerEntries:[], journalMeta:[] };
+}
+function defaultMeta(){ return { integrity:null, lockout:{fails:0, until:0}, timer:null, lastBackupAt:null, lastIntegrityAt:null, lastIntegrityDay:'' }; }
+let db=null, meta=null;
+
+function normalizeParsed(raw){
+  const def=defaultDB();
+  const data = raw && typeof raw==='object' ? JSON.parse(JSON.stringify(raw)) : {};
+  data.settings = Object.assign(def.settings, data.settings || {});
+  data.settings.taxEnabled = data.settings.taxEnabled !== undefined ? !!data.settings.taxEnabled : jurisDefaults(data.settings).taxDefault;
+  data.settings.clientMoneyEnabled = data.settings.clientMoneyEnabled !== false;
+  if(typeof data.settings.pinLength !== 'number') data.settings.pinLength = 4;
+  data.seq = Object.assign({invoice:1,receipt:1,journal:1}, data.seq || {});
+  data.clients = Array.isArray(data.clients)? data.clients : [];
+  data.matters = Array.isArray(data.matters)? data.matters : [];
+  data.timeEntries = Array.isArray(data.timeEntries)? data.timeEntries : [];
+  data.expenses = Array.isArray(data.expenses)? data.expenses : [];
+  data.invoices = Array.isArray(data.invoices)? data.invoices : [];
+  data.auditLog = Array.isArray(data.auditLog)? data.auditLog : [];
+  data.ledgerEntries = Array.isArray(data.ledgerEntries)? data.ledgerEntries : [];
+  data.journalMeta = Array.isArray(data.journalMeta)? data.journalMeta : [];
+  return data;
+}
+function jurisDefaults(s){ const c=(s&&s.country)||'IN'; if(c==='US') return {taxDefault:false}; if(c==='GB') return {taxDefault:true}; if(c==='IN') return {taxDefault:true}; return {taxDefault:false}; }
+
+function saveDB(){
+  try{ storeSet(DB_KEY, JSON.stringify(db)); }catch(e){ toast('Storage full or blocked','error'); }
+  queueWsSave();
+}
+function loadDB(){
+  try{
+    const raw=storeGet(DB_KEY);
+    if(!raw) return false;
+    const d=JSON.parse(raw);
+    if(!d || typeof d!=='object') throw new Error('bad db');
+    db = normalizeParsed(d);
+    return true;
+  }catch(e){ return false; }
+}
+function saveMeta(){ try{ storeSet(META_KEY, JSON.stringify(meta)); }catch(e){} }
+function loadMeta(){ try{ meta = Object.assign(defaultMeta(), JSON.parse(storeGet(META_KEY) || 'null') || {}); }catch(e){ meta=defaultMeta(); } }
+function persistAll(){ saveMeta(); saveDB(); }
+
+/* ---------- Workspace (flat file, concurrent, offline) ---------- */
+const WS = { handle:null, rev:0, name:'', mode:'none', saving:false };
+function wsFileSupported(){ return typeof window!=='undefined' && window.showOpenFilePicker && window.showSaveFilePicker; }
+function queueWsSave(){
+  if(WS.mode==='none') return;
+  if(WS.saving) return;
+  WS.saving = true;
+  setTimeout(()=>{ pushWorkspace().finally(()=>{ WS.saving=false; }); }, 80);
+}
+async function openWorkspaceFile(){
+  try{
+    let fileHandle;
+    if(wsFileSupported()){
+      [fileHandle] = await window.showOpenFilePicker({types:[{description:'LexTime workspace', accept:{'application/json':['.json']}}]});
+    } else {
+      toast('This browser does not support file handles — use Backup & Integrity → Restore to import a workspace file.','warn');
+      return;
+    }
+    const file = await fileHandle.getFile();
+    const json = JSON.parse(await file.text());
+    if(!json || json.type!=='lex-workspace' || !json.db) throw new Error('Not a LexTime workspace file');
+    const incoming = normalizeParsed(json.db);
+    if(db && wsHasData(db)){
+      const choice = confirm('Load this workspace file and replace the current data?\n\nCancel = keep current data (file untouched).');
+      if(!choice) return;
+    }
+    WS.handle = fileHandle; WS.rev = json.rev || 0; WS.name = file.name; WS.mode='file';
+    db = incoming;
+    meta = defaultMeta(); meta.integrity = computeDigest(); persistAll();
+    closeModal(); toast('Workspace loaded: '+WS.name); renderApp();
+  }catch(e){ if(e && e.name!=='AbortError') toast('Open failed: '+(e.message||e),'error'); }
+}
+function wsHasData(d){ return d && (d.clients.length || d.matters.length || d.timeEntries.length || d.invoices.length || d.ledgerEntries.length); }
+async function createWorkspaceFile(){
+  if(!wsFileSupported()){ toast('File System Access API unavailable in this browser. Use Backup & Integrity → Export instead.','warn'); return; }
+  try{
+    const handle = await window.showSaveFilePicker({suggestedName:'lex-workspace.json', types:[{description:'LexTime workspace', accept:{'application/json':['.json']}}]});
+    WS.handle = handle; WS.rev = 0; WS.name = handle.name || 'lex-workspace.json'; WS.mode='file';
+    await writeWorkspaceFile();
+    toast('Workspace file created: '+WS.name);
+  }catch(e){ if(e && e.name!=='AbortError') toast('Create failed: '+(e.message||e),'error'); }
+}
+async function writeWorkspaceFile(){
+  if(!WS.handle) return;
+  WS.rev = (WS.rev||0) + 1;
+  const payload = { type:'lex-workspace', version:2, rev:WS.rev, savedAt:nowISO(), db:clone(db) };
+  const text = JSON.stringify(payload, null, 2);
+  try{
+    const w = await WS.handle.createWritable();
+    await w.write(text); await w.close();
+    meta.lastBackupAt = nowISO(); saveMeta();
+  }catch(e){ toast('Workspace write failed: '+(e.message||e),'error'); }
+}
+async function pushWorkspace(){
+  if(WS.mode!=='file' || !WS.handle) return;
+  let remote=null;
+  try{
+    const file = await WS.handle.getFile();
+    const json = JSON.parse(await file.text());
+    remote = { rev: json.rev||0, db: normalizeParsed(json.db||{}) };
+  }catch(e){ /* file may not exist yet or unreadable — treat as remote */ }
+  if(remote && remote.rev > (WS.rev||0)){
+    const decision = await workspaceConflictPrompt(remote);
+    if(decision==='cancel') return;
+    if(decision==='remote'){ db = remote.db; WS.rev = remote.rev; meta=defaultMeta(); meta.integrity=computeDigest(); persistAll(); toast('Loaded the newer file version.'); renderApp(); return; }
+    if(decision==='local'){ await writeWorkspaceFile(); toast('Your version was written to the file.'); return; }
+    if(decision==='merge'){
+      const result = mergeDatabases(db, remote.db);
+      db = result.db;
+      WS.rev = remote.rev;
+      meta=defaultMeta(); meta.integrity=computeDigest(); persistAll();
+      await writeWorkspaceFile();
+      toast('Merged ' + (result.changed||0) + ' records. File updated.');
+      renderApp(); return;
+    }
+    return;
+  }
+  await writeWorkspaceFile();
+}
+function mergeDatabases(local, remote){
+  const out = clone(local);
+  const changed = [];
+  const byId = (arr) => { const m = new Map(); (arr||[]).forEach(x=>{ if(x&&x.id) m.set(x.id,x); }); return m; };
+  const mergeList = (key) => {
+    const L = byId(local[key]); const R = byId(remote[key]);
+    const map = new Map();
+    L.forEach((v,id)=> map.set(id,{id, local:v, remote:R.has(id)?R.get(id):null}));
+    R.forEach((v,id)=>{ if(!map.has(id)) map.set(id,{id, local:null, remote:v}); });
+    const arr = [];
+    map.forEach(({id, local, remote})=>{
+      if(local && remote && JSON.stringify(local)!==JSON.stringify(remote)){
+        changed.push({entity:key, id, local, remote});
+        arr.push(local); /* local wins by default; user may choose remote via prompt */
+      } else {
+        arr.push(remote ? remote : local);
+      }
+    });
+    out[key] = arr;
+  };
+  ['clients','matters','timeEntries','expenses','invoices','auditLog','ledgerEntries','journalMeta'].forEach(mergeList);
+  out.settings = Object.assign(clone(local.settings), clone(remote.settings));
+  out.seq = { invoice: Math.max(local.seq.invoice, remote.seq.invoice), receipt: Math.max(local.seq.receipt, remote.seq.receipt), journal: Math.max(local.seq.journal||1, remote.seq.journal||1) };
+  return { db: out, conflicts: changed, changed: changed.length };
+}
+function workspaceConflictPrompt(remote){
+  return new Promise(resolve => {
+    const merged = mergeDatabases(db, remote.db);
+    const conflicts = merged.conflicts;
+    let acceptLocalAll = false, acceptRemoteAll = false;
+    modal(`
+      ${modalHeader('Workspace conflict')}
+      <div class="modalbody">
+        <p style="font-size:14px;color:#475569;margin-bottom:12px">The file has a newer revision (rev ${remote.rev}) than your working copy (rev ${WS.rev||0}). Choose how to proceed:</p>
+        <div class="flex wrap gap2" style="margin-bottom:12px">
+          <button class="btn btn-dark" onclick="wsResolve('local')">${icon('check','sm')} Keep my version</button>
+          <button class="btn btn-light" onclick="wsResolve('remote')">${icon('arrow-down','sm')} Load file version</button>
+          <button class="btn btn-green" onclick="wsResolve('merge')">${icon('merge','sm')} Merge</button>
+          <button class="btn btn-light" onclick="wsResolve('cancel')">Cancel</button>
+        </div>
+        ${conflicts.length? `<p style="font-size:12px;color:#b45309;margin-bottom:8px">${conflicts.length} conflicting record(s) found. Merge uses your version by default for each one.</p>` : ''}
+        <div style="max-height:240px;overflow-y:auto">
+          ${conflicts.slice(0,30).map((c,i)=>`
+            <div style="border:1px solid #e2e8f0;border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px">
+              <div style="font-weight:600">${esc(c.entity)} · ${esc(c.id.slice(0,8))}…</div>
+              <select class="select" id="confSel${i}" style="margin-top:6px">
+                <option value="local" selected>Use my version</option>
+                <option value="remote">Use file version</option>
+              </select>
+            </div>`).join('')}
+        </div>
+      </div>
+    `);
+    window.wsResolve = (choice) => {
+      const sels = $$('select[id^="confSel"]');
+      const picks = sels.map(s=>s.value);
+      if(choice==='merge' && picks.length){
+        const map = new Map();
+        conflicts.forEach((c,i)=> map.set(c.id, picks[i]||'local'));
+        const out = mergeDatabases(db, remote.db).db;
+        ['clients','matters','timeEntries','expenses','invoices','auditLog','ledgerEntries','journalMeta'].forEach(key=>{
+          out[key] = out[key].map(x=>{
+            const idx = conflicts.findIndex(c=>c.id===x.id);
+            if(idx>=0 && map.get(x.id)==='remote' && remote.db[key]){
+              const r = remote.db[key].find(y=>y.id===x.id);
+              if(r) return r;
+            }
+            return x;
+          });
+        });
+        db = out; resolve('merge');
+      } else {
+        resolve(choice);
+      }
+      closeModal();
+    };
+  });
+}
+
+function clone(v){ if(v==null) return null; try{ return JSON.parse(JSON.stringify(v)); }catch(e){ return String(v); } }
+function auditLogAdd(action, entity, before, after, label){
+  const log = Array.isArray(db.auditLog)? db.auditLog : (db.auditLog=[]);
+  const prev = log[log.length-1];
+  const seq = prev? prev.seq+1 : 1;
+  const base = { seq, ts:nowISO(), action, entity, entityId:(after&&after.id!=null)?after.id:(before&&before.id!=null)?before.id:null, label:label||'', before:clone(before), after:clone(after), prevHash: prev? prev.hash : 'genesis' };
+  base.hash = cyrb53(JSON.stringify({seq:base.seq,ts:base.ts,action:base.action,entity:base.entity,entityId:base.entityId,label:base.label,before:base.before,after:base.after,prevHash:base.prevHash}),424242).toString(36);
+  log.push(base);
+  if(log.length>8000) log.splice(0, log.length-8000);
+  return base;
+}
+function verifyAuditLog(){
+  const log=Array.isArray(db.auditLog)?db.auditLog:[];
+  if(!log.length) return {ok:true, count:0};
+  for(let i=0;i<log.length;i++){
+    const e=log[i];
+    const ep = i===0? 'genesis' : log[i-1].hash;
+    if(e.prevHash!==ep) return {ok:false, at:i, why:'prevHash mismatch'};
+    const h=cyrb53(JSON.stringify({seq:e.seq,ts:e.ts,action:e.action,entity:e.entity,entityId:e.entityId,label:e.label,before:e.before,after:e.after,prevHash:e.prevHash}),424242).toString(36);
+    if(h!==e.hash) return {ok:false, at:i, why:'entry hash mismatch'};
+  }
+  return {ok:true, count:log.length};
+}
+
+function computeDigest(){
+  const payload = JSON.stringify({ c:db.clients, m:db.matters, t:db.timeEntries, e:db.expenses, i:db.invoices, s:db.settings, a:(db.auditLog||[]), l:(db.ledgerEntries||[]), j:(db.journalMeta||[]) });
+  return { hash:cyrb53(payload, 777).toString(36), size:payload.length, rec: db.clients.length+db.matters.length+db.timeEntries.length+db.expenses.length+db.invoices.length+(db.auditLog?db.auditLog.length:0)+(db.ledgerEntries?db.ledgerEntries.length:0) };
+}
+function checkIntegrity(){
+  const d = computeDigest();
+  if(!meta.integrity) return {ok:true, digest:d, first:true};
+  if(meta.integrity.hash!==d.hash || meta.integrity.size!==d.size) return {ok:false, expected:meta.integrity, actual:d};
+  return {ok:true, digest:d};
+}
+function recordIntegrity(){ meta.integrity = computeDigest(); meta.lastIntegrityAt = nowISO(); saveMeta(); }
+function validateSchema(){
+  const errors=[];
+  const matters=new Set(db.matters.map(m=>m.id));
+  const clients=new Set(db.clients.map(c=>c.id));
+  const okMoney=(v)=>(typeof v==='number'&&isFinite(v)&&v>=0);
+  const okId=(id,set,label)=>{ if(!id) errors.push(`Missing ${label} id`); else if(!set.has(id)) errors.push(`Orphan reference: ${label} ${id}`); };
+  db.clients.forEach((c,i)=>{ if(!c.id) errors.push(`Client #${i+1}: missing id`); if(!c.name) errors.push(`Client #${i+1}: missing name`); });
+  db.matters.forEach((m,i)=>{ if(!m.id) errors.push(`Matter #${i+1}: missing id`); okId(m.clientId, clients, 'client'); if(!m.title) errors.push(`Matter #${i+1}: missing title`); if(m.hourlyRate!=null && !okMoney(m.hourlyRate)) errors.push(`Matter "${m.title}" has invalid hourly rate`); });
+  db.timeEntries.forEach((t,i)=>{ if(!t.id) errors.push(`Time entry #${i+1}: missing id`); okId(t.matterId, matters, 'matter'); if(!t.date || isNaN(new Date(t.date))) errors.push(`Time entry #${i+1}: bad date`); if(!(t.minutes>=1 && t.minutes<=43200)) errors.push(`Time entry #${i+1}: minutes out of range`); if(!okMoney(t.rateAtEntry)) errors.push(`Time entry #${i+1}: rate invalid`); });
+  db.expenses.forEach((x,i)=>{ if(!x.id) errors.push(`Expense #${i+1}: missing id`); okId(x.matterId, matters, 'matter'); if(!okMoney(x.amount)) errors.push(`Expense #${i+1}: invalid amount`); });
+  db.invoices.forEach((inv,i)=>{
+    if(!inv.id) errors.push(`Invoice #${i+1}: missing id`);
+    okId(inv.matterId, matters, 'matter'); okId(inv.clientId, clients, 'client');
+    if(!okMoney(inv.subtotal) || !okMoney(inv.total)) errors.push(`Invoice ${inv.number}: invalid totals`);
+    const paid=(inv.payments || []).reduce((s,p)=>s+(+p.amount || 0),0);
+    if(paid > inv.total + 0.01) errors.push(`Invoice ${inv.number}: payments exceed total`);
+    if(inv.taxType==='cgst' && !okMoney(inv.cgst)) errors.push(`Invoice ${inv.number}: missing CGST`);
+  });
+  (db.ledgerEntries || []).forEach((e,i)=>{
+    if(!e.id) errors.push(`Ledger entry #${i+1}: missing id`);
+    if(!['office','client','bank'].includes(e.side)) errors.push(`Ledger entry #${i+1}: bad side`);
+    if(!['d','c'].includes(e.dir)) errors.push(`Ledger entry #${i+1}: bad direction`);
+    if(!okMoney(e.amount)) errors.push(`Ledger entry #${i+1}: invalid amount`);
+    if(e.matterId && !matters.has(e.matterId)) errors.push(`Ledger entry #${i+1}: orphan matter`);
+    if(e.clientId && !clients.has(e.clientId)) errors.push(`Ledger entry #${i+1}: orphan client`);
+  });
+  return errors;
+}
+
+let pinEntry=[], pinMode='enter', pinFirst=null, lockTicker=null;
+function currentPinLength(){ return (db && db.settings && typeof db.settings.pinLength === 'number') ? db.settings.pinLength : 4; }
+function renderLockScreen(){
+  const ls=$('#lockScreen'); ls.classList.remove('hidden');
+  const hasPin = db && db.settings.pinHash;
+  pinMode = hasPin ? 'enter' : 'create';
+  pinFirst=null; pinEntry=[];
+  $('#lockSubtitle').textContent = hasPin ? 'Enter your PIN to continue' : 'Create a 4–6 digit PIN to protect your data';
+  $('#lockMessage').textContent='';
+  renderPinDots(); renderKeypad();
+  if(meta.lockout && meta.lockout.until > Date.now()) startLockoutCountdown();
+  hideSplash();
+}
+function renderPinDots(){
+  const n = pinMode==='enter' ? currentPinLength() : 6;
+  $('#pinDots').innerHTML = Array.from({length:n},()=> '<span class="dot"></span>').join('');
+  $$('#pinDots .dot').forEach((d,i)=> d.style.background = i<pinEntry.length ? '#0f172a' : 'transparent');
+}
+function renderKeypad(){
+  const keys=['1','2','3','4','5','6','7','8','9','','0','⌫'];
+  $('#keypad').innerHTML = keys.map(k=>{
+    if(k==='') return (pinMode==='create') ? `<button onclick="pinSubmit()" style="background:#0f172a;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center">${icon('check','sm')}</button>` : '<span></span>';
+    if(k==='⌫') return `<button onclick="pinBackspace()">${icon('delete','sm')}</button>`;
+    return `<button onclick="pinDigit('${k}')">${k}</button>`;
+  }).join('');
+}
+function pinDigit(d){
+  if(meta.lockout && meta.lockout.until > Date.now()) return;
+  if(pinEntry.length >= 6) return;
+  pinEntry.push(d); renderPinDots();
+  if(pinMode==='enter'){
+    const len = currentPinLength();
+    if(pinEntry.length === len) setTimeout(pinSubmit, 80);
+  } else {
+    if(pinEntry.length === 6) setTimeout(pinSubmit, 80);
+  }
+}
+function pinBackspace(){ pinEntry.pop(); renderPinDots(); }
+function pinSubmit(){
+  if(meta.lockout && meta.lockout.until > Date.now()) return;
+  if(pinMode==='enter'){
+    const ok = pinHash(pinEntry.join('')) === db.settings.pinHash;
+    if(ok){ meta.lockout = {fails:0, until:0}; saveMeta(); unlockApp(); }
+    else {
+      const fl = meta.lockout.fails + 1;
+      if(fl >= 5){ meta.lockout={fails:0, until:Date.now()+30000}; saveMeta(); startLockoutCountdown(); }
+      else { meta.lockout={fails:fl, until:0}; saveMeta(); }
+      $('#lockMessage').textContent = `Incorrect PIN (${fl}/5 attempts)`;
+      pinEntry=[]; renderPinDots();
+    }
+  } else {
+    if(pinFirst===null){
+      if(pinEntry.length<4){ $('#lockMessage').textContent='PIN must be at least 4 digits'; pinEntry=[]; renderPinDots(); return; }
+      pinFirst = pinEntry.join(''); pinEntry=[]; renderPinDots();
+      $('#lockSubtitle').textContent='Confirm your PIN'; $('#lockMessage').textContent='';
+    } else {
+      if(pinEntry.length<4){ $('#lockMessage').textContent='PIN must be at least 4 digits'; pinEntry=[]; renderPinDots(); return; }
+      if(pinEntry.join('') !== pinFirst){
+        $('#lockMessage').textContent='PINs do not match — try again';
+        pinFirst=null; pinEntry=[]; renderPinDots();
+        $('#lockSubtitle').textContent='Create a 4–6 digit PIN to protect your data'; return;
+      }
+      db.settings.pinHash = pinHash(pinFirst);
+      db.settings.pinLength = pinFirst.length;
+      meta.integrity = computeDigest(); persistAll();
+      toast('PIN set successfully'); unlockApp();
+    }
+  }
+}
+function startLockoutCountdown(){
+  const tick=()=>{
+    const left = meta.lockout.until - Date.now();
+    if(left<=0){ clearInterval(lockTicker); $('#lockMessage').textContent=''; renderKeypad(); return; }
+    $('#lockMessage').textContent = `Too many attempts — retry in ${Math.ceil(left/1000)}s`;
+    renderKeypad();
+  };
+  clearInterval(lockTicker); tick(); lockTicker=setInterval(tick,1000);
+}
+function relock(){ $('#appShell').classList.add('hidden'); $('#main').innerHTML=''; renderLockScreen(); }
+function unlockApp(){ $('#lockScreen').classList.add('hidden'); $('#appShell').classList.remove('hidden'); runAutomaticIntegrity(); renderApp(); }
+
+const state = { view:'dashboard', param:null };
+function navItems(){
+  return [
+    {id:'dashboard', label:'Dashboard', icon:'home'},
+    {id:'clients', label:'Clients', icon:'users'},
+    {id:'matters', label:'Matters', icon:'briefcase'},
+    {id:'timer', label:'Timer', icon:'timer'},
+    {id:'entries', label:'Time Entries', icon:'clock'},
+    {id:'expenses', label:'Expenses', icon:'receipt'},
+    {id:'money', label:'Client Money', icon:'landmark'},
+    {id:'invoices', label:'Invoices', icon:'file-text'},
+    {id:'receipts', label:'Receipts', icon:'credit-card'},
+    {id:'reports', label:'Reports', icon:'bar-chart-2'},
+    {id:'backup', label:'Backup & Integrity', icon:'database'},
+    {id:'settings', label:'Settings', icon:'settings'}
+  ];
+}
+function navTo(view, param){ state.view=view; state.param=param??null; renderApp(); }
+function renderApp(){
+  renderSidebar(); renderTopbar();
+  const main=$('#main');
+  switch(state.view){
+    case 'clients': main.innerHTML = viewClients(); break;
+    case 'client': main.innerHTML = viewClient(state.param); break;
+    case 'matters': main.innerHTML = viewMatters(); break;
+    case 'matter': main.innerHTML = viewMatter(state.param); break;
+    case 'timer': main.innerHTML = viewTimer(); break;
+    case 'entries': main.innerHTML = viewTimeEntries(); break;
+    case 'expenses': main.innerHTML = viewExpenses(); break;
+    case 'money': main.innerHTML = viewMoney(); break;
+    case 'invoices': main.innerHTML = viewInvoices(); break;
+    case 'invoice': main.innerHTML = viewInvoice(state.param); break;
+    case 'invoiceBuilder': main.innerHTML = viewInvoiceBuilder(state.param); break;
+    case 'receipts': main.innerHTML = viewReceipts(); break;
+    case 'receipt': main.innerHTML = viewReceipt(state.param); break;
+    case 'reports': main.innerHTML = viewReports(); break;
+    case 'backup': main.innerHTML = viewBackup(); break;
+    case 'settings': main.innerHTML = viewSettings(); break;
+    default: main.innerHTML = viewDashboard();
+  }
+  window.scrollTo(0,0);
+}
+function renderSidebar(){
+  const items=navItems();
+  const active = state.view==='client' ? 'clients' : state.view==='matter' ? 'matters' : state.view==='invoice'||state.view==='invoiceBuilder' ? 'invoices' : state.view==='receipt' ? 'receipts' : state.view;
+  $('#navList').innerHTML = items.map(n=>{
+    const act = n.id===active;
+    return `<button onclick="navTo('${n.id}')" class="${act?'active':''}"><span style="width:24px;display:flex;justify-content:center;flex-shrink:0">${icon(n.icon,'sm')}</span><span class="ilabel">${n.label}</span></button>`;
+  }).join('');
+}
+function renderTopbar(){
+  const item = navItems().find(n=>n.id===state.view) || {label:'LexTime'};
+  const running = timerRunning();
+  $('#topbar').innerHTML = `
+    <div><h2>${esc(item.label)}</h2><div class="sub">${esc(db.settings.firmName)} · ${esc(curCode())}</div></div>
+    <div class="flex center gap3">
+      ${running ? `<button onclick="navTo('timer')" class="chip-timer"><span class="dotred"></span><span id="topTimerChip" class="mono">${msToHMS(running.ms)}</span></button>` : ''}
+      ${WS.mode==='file' ? `<span style="font-size:11px;color:#64748b;background:#f1f5f9;border-radius:999px;padding:4px 10px">${icon('file-down','sm')} ${esc(WS.name||'workspace')}</span>` : ''}
+    </div>`;
+  if(running) startTimerTicker();
+}
+let topTicker=null;
+function startTimerTicker(){
+  clearInterval(topTicker);
+  topTicker = setInterval(()=>{
+    const r=timerRunning(); const chip=$('#topTimerChip');
+    if(r && chip){ chip.textContent = msToHMS(r.ms); }
+    else { clearInterval(topTicker); renderTopbar(); }
+  }, 1000);
+}
+
+const clientById = id => db.clients.find(c=>c.id===id);
+const matterById = id => db.matters.find(m=>m.id===id);
+const mattersOfClient = cid => db.matters.filter(m=>m.clientId===cid);
+const openMatters = () => db.matters.filter(m=>m.status!=='closed');
+function matterUnbilledValue(matterId){
+  let v=0;
+  db.timeEntries.forEach(t=>{ if(t.matterId===matterId && t.billable && !t.invoiced) v += (t.minutes/60)*t.rateAtEntry; });
+  db.expenses.forEach(x=>{ if(x.matterId===matterId && x.billable && !x.invoiced) v += x.amount; });
+  return round2(v);
+}
+function matterOutstanding(matterId){
+  let out=0;
+  db.invoices.forEach(inv=>{
+    if(inv.matterId===matterId && inv.status!=='void'){
+      const paid=(inv.payments||[]).reduce((s,p)=>s+(+p.amount||0),0);
+      out += inv.total - paid;
+    }
+  });
+  return round2(out);
+}
+function invoicePaid(inv){ return round2((inv.payments||[]).reduce((s,p)=>s+(+p.amount||0),0)); }
+function invoiceBalance(inv){ return round2(inv.total - invoicePaid(inv)); }
+function invoiceStatusChip(inv){
+  if(inv.status==='void') return `<span class="chip chip-gray">Voided</span>`;
+  if(inv.status==='draft') return `<span class="chip chip-gray">Draft</span>`;
+  const bal=invoiceBalance(inv);
+  if(bal<=0.005) return `<span class="chip chip-green">Paid</span>`;
+  if(invoicePaid(inv)>0) return `<span class="chip chip-amber">Partially paid</span>`;
+  return `<span class="chip chip-blue">Issued</span>`;
+}
+
+const pageTitle = (title, actions) => `<div class="pagehead no-print"><h1>${title}</h1><div class="flex wrap gap2">${actions||''}</div></div>`;
+const btnPrimary = (label, onclick, ic) => `<button class="btn btn-dark" onclick="${onclick}">${icon(ic||'plus','sm')} ${label}</button>`;
+const btnGhost = (label, onclick, ic) => `<button class="btn btn-light" onclick="${onclick}">${ic?icon(ic,'sm'):''} ${label}</button>`;
+const btnGreen = (label, onclick, ic) => `<button class="btn btn-green" onclick="${onclick}">${icon(ic||'check','sm')} ${label}</button>`;
+const statCard = (label, value, sub, ic) => `<div class="card stat"><div class="flex between"><div><div class="lbl">${label}</div><div class="val">${value}</div>${sub?`<div class="subv">${sub}</div>`:''}</div><div class="ico">${icon(ic,'sm')}</div></div></div>`;
+const emptyState = (ic, title, sub) => `<div class="empty"><div class="eico">${icon(ic,'sm')}</div><div style="font-weight:600;color:#334155">${title}</div>${sub?`<div style="font-size:14px;margin-top:4px">${sub}</div>`:''}</div>`;
+function modal(html, wide){ $('#modalRoot').innerHTML = `<div class="modal-ov" onclick="if(event.target===this)closeModal()"><div class="modal ${wide?'wide':''}" onclick="event.stopPropagation()">${html}</div></div>`; }
+function closeModal(){ $('#modalRoot').innerHTML=''; }
+const modalHeader = (title, sub) => `<div class="modalhead"><div><h3>${title}</h3>${sub?`<div class="msub">${sub}</div>`:''}</div><button class="iconbtn" onclick="closeModal()">${icon('x','sm')}</button></div>`;
+const modalFooter = (cancelLabel, saveHtml) => `<div class="modalfoot"><button class="btn btn-light" onclick="closeModal()">${cancelLabel||'Cancel'}</button>${saveHtml}</div>`;
+const field = (label, inner) => `<div class="field"><label>${label}</label>${inner}</div>`;
+
+function led(){ return db.ledgerEntries || (db.ledgerEntries=[]); }
+function bal(side, account, f){
+  f=f||{};
+  let b=0;
+  led().forEach(e=>{
+    if(e.side!==side) return;
+    if(account && e.account!==account) return;
+    if(f.matterId && e.matterId!==f.matterId) return;
+    if(f.clientId && e.clientId!==f.clientId) return;
+    b += e.dir==='d' ? e.amount : -e.amount;
+  });
+  return round2(b);
+}
+function clientLedgerBalance(clientId){ return bal('client','Client Ledger',{clientId}); }
+function clientBankBalance(clientId){ return bal('bank','Client Bank',{clientId}); }
+function clientFundsAvailable(clientId){ return Math.max(0, round2(-clientLedgerBalance(clientId))); }
+function matterClientId(mid){ const m=matterById(mid); return m?m.clientId:null; }
+function clientFundsAvailableForMatter(mid){ const cid=matterClientId(mid); return cid? clientFundsAvailable(cid) : 0; }
+function postJournal(o){
+  const lines=o.lines||[];
+  let d=0,c=0;
+  lines.forEach(l=>{ if(l.dir==='d') d+=l.amount; else c+=l.amount; });
+  if(Math.abs(d-c)>0.005){ toast('Journal unbalanced — debits must equal credits','error'); return false; }
+  const jid=uid();
+  lines.forEach(l=>{
+    led().push({id:uid(), jid, date:o.date||todayISO(), clientId:o.clientId||null, matterId:o.matterId||null, side:l.side, account:l.account, amount:round2(l.amount), dir:l.dir, memo:o.desc||'', ref:o.ref||'', createdAt:nowISO()});
+  });
+  db.journalMeta=db.journalMeta||[];
+  db.journalMeta.push({id:jid, date:o.date||todayISO(), clientId:o.clientId||null, matterId:o.matterId||null, desc:o.desc||'', ref:o.ref||'', createdAt:nowISO()});
+  auditLogAdd('create','journal',null,{jid, desc:o.desc||'', lines}, 'Journal: '+(o.desc||''));
+  recordIntegrity(); saveDB();
+  return true;
+}
+function receiveClientMoney(clientId, matterId, amount, method, ref, date){
+  amount=round2(+amount); if(amount<=0){ toast('Enter a positive amount','error'); return false; }
+  const ok = postJournal({date, clientId, matterId, desc:'Client funds received', ref:method+(ref?' · '+ref:''), lines:[
+    {side:'bank', account:'Client Bank', amount, dir:'d'},
+    {side:'client', account:'Client Ledger', amount, dir:'c'}
+  ]});
+  if(ok) toast('Client funds received — client ledger credited');
+  return ok;
+}
+function transferToOffice(clientId, matterId, amount, desc, date){
+  amount=round2(+amount); if(amount<=0){ toast('Enter a positive amount','error'); return false; }
+  if(clientFundsAvailable(clientId) < amount - 0.005){ toast('Insufficient client funds for this client','error'); return false; }
+  if(clientBankBalance(clientId) < amount - 0.005){ toast('Client bank balance is insufficient','error'); return false; }
+  const ok = postJournal({date, clientId, matterId, desc:desc||'Transfer to office (earned fees)', lines:[
+    {side:'client', account:'Client Ledger', amount, dir:'d'},
+    {side:'office', account:'Fees Earned', amount, dir:'c'},
+    {side:'bank', account:'Client Bank', amount, dir:'c'},
+    {side:'bank', account:'Office Bank', amount, dir:'d'}
+  ]});
+  if(ok) toast('Transferred to office — fees earned');
+  return ok;
+}
+function disburseFromClient(clientId, matterId, amount, category, ref, date){
+  amount=round2(+amount); if(amount<=0){ toast('Enter a positive amount','error'); return false; }
+  if(clientFundsAvailable(clientId) < amount - 0.005){ toast('Insufficient client funds for this client','error'); return false; }
+  if(clientBankBalance(clientId) < amount - 0.005){ toast('Client bank balance is insufficient','error'); return false; }
+  const ok = postJournal({date, clientId, matterId, desc:'Disbursement from client funds', ref:(category||'')+(ref?' · '+ref:''), lines:[
+    {side:'client', account:'Client Ledger', amount, dir:'d'},
+    {side:'bank', account:'Client Bank', amount, dir:'c'}
+  ]});
+  if(ok) toast('Disbursement recorded against client funds');
+  return ok;
+}
+function officeExpense(amount, category, ref, date){
+  amount=round2(+amount); if(amount<=0){ toast('Enter a positive amount','error'); return false; }
+  const ok = postJournal({date, desc:'Office expense', ref:(category||'')+(ref?' · '+ref:''), lines:[
+    {side:'office', account:'Disbursements / Costs', amount, dir:'d'},
+    {side:'bank', account:'Office Bank', amount, dir:'c'}
+  ]});
+  if(ok) toast('Office expense recorded');
+  return ok;
+}
+
+function viewDashboard(){
+  const openInv = db.invoices.filter(i=>i.status==='issued' && invoiceBalance(i)>0.005);
+  const outstanding = round2(openInv.reduce((s,i)=>s+invoiceBalance(i),0));
+  const overdue = round2(openInv.filter(i=>i.dueDate && i.dueDate<todayISO()).reduce((s,i)=>s+invoiceBalance(i),0));
+  const unbilled = round2(db.matters.reduce((s,m)=>s+matterUnbilledValue(m.id),0));
+  const thisMonth = todayISO().slice(0,7);
+  const hrsMonth = db.timeEntries.filter(t=>t.date.slice(0,7)===thisMonth).reduce((s,t)=>s+t.minutes,0);
+  const recentEntries = [...db.timeEntries].sort((a,b)=>b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)).slice(0,6);
+  const overdueList = [...openInv].filter(i=>i.dueDate && i.dueDate<todayISO()).sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,5);
+  return `
+    ${pageTitle('Dashboard', btnPrimary('New Invoice','navTo(\'invoiceBuilder\')','file-plus-2') + ' ' + btnGhost('Time Entry','openTimeForm()','clock'))}
+    <div class="grid g4 mb4">
+      ${statCard('Outstanding balance', fmtINR(outstanding), `${overdueList.length} overdue invoice(s)`, 'wallet')}
+      ${statCard('Overdue', fmtINR(overdue), 'past due date', 'alert-triangle')}
+      ${statCard('Unbilled time & costs', fmtINR(unbilled), 'billable, not yet invoiced', 'clock')}
+      ${statCard('Time logged this month', minsToHM(hrsMonth), thisMonth, 'calendar')}
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(1,1fr);gap:24px">
+      <div class="card">
+        <div class="cardhead"><span>Recent time entries</span><button class="btn btn-light" onclick="navTo('entries')">View all</button></div>
+        ${recentEntries.length? `<div>${recentEntries.map(t=>{
+          const m=matterById(t.matterId), c=m?clientById(m.clientId):null;
+          return `<div class="rowline"><div class="ico" style="width:36px;height:36px;border-radius:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center">${icon('clock','sm')}</div><div class="grow"><div style="font-weight:500;font-size:14px">${esc(t.description||'(no description)')}</div><div style="font-size:12px;color:#94a3b8">${esc(m?m.title:'—')} · ${esc(c?c.name:'—')} · ${esc(t.solicitor||'—')}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px">${minsToHM(t.minutes)}</div><div style="font-size:12px;color:#94a3b8">${fmtDate(t.date)}</div></div></div>`;}).join('')}</div>` : emptyState('timer','No time entries yet','Start the timer or add an entry')}
+      </div>
+      <div class="card"><div class="cardhead"><span>Overdue invoices</span></div>
+        ${overdueList.length? `<div>${overdueList.map(inv=>{
+          const c=clientById(inv.clientId);
+          return `<div class="rowline"><div class="grow"><div style="font-weight:600;font-size:14px">${esc(inv.number)}</div><div style="font-size:12px;color:#94a3b8">${esc(c?c.name:'')} · due ${fmtDate(inv.dueDate)}</div></div><div style="font-weight:700;color:#dc2626">${fmtINR(invoiceBalance(inv))}</div></div>`;}).join('')}</div>` : `<div class="empty">No overdue invoices 🎉</div>`}
+      </div>
+    </div>`;
+}
+
+function viewClients(){
+  const q = (state.param && state.param.q) || '';
+  const list = db.clients.filter(c=>!q || c.name.toLowerCase().includes(q.toLowerCase()));
+  return `
+    ${pageTitle('Clients', btnPrimary('Add client','openClientForm()','user-plus'))}
+    <div class="mb4" style="max-width:448px">${field('Search', `<div class="flex" style="position:relative"><span style="position:absolute;left:12px;top:10px;color:#94a3b8">${icon('search','sm')}</span><input class="input" style="padding-left:38px" placeholder="Search clients…" value="${esc(q)}" oninput="state.param={q:this.value};renderApp()"></div>`)}</div>
+    <div class="grid g3">
+      ${list.map(c=>{
+        const matters=mattersOfClient(c.id);
+        const out=round2(matters.reduce((s,m)=>s+matterOutstanding(m.id),0));
+        return `<div class="card" style="padding:20px;cursor:pointer" onclick="navTo('client','${c.id}')">
+          <div class="flex between" style="align-items:flex-start"><div class="flex gap3"><div class="avatar">${esc(c.name.trim().split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase())}</div><div><div style="font-weight:700;font-size:15px">${esc(c.name)}</div><div style="font-size:12px;color:#94a3b8">${matters.length} matter(s)</div></div></div><button class="iconbtn" onclick="event.stopPropagation();openClientForm('${c.id}')">${icon('pencil','sm')}</button></div>
+          <div class="flex between" style="border-top:1px solid #f1f5f9;margin-top:16px;padding-top:16px"><span style="font-size:12px;color:#64748b">Outstanding</span><span style="font-weight:800;font-size:16px;color:${out>0?'#dc2626':'#059669'}">${fmtINR(out)}</span></div>
+        </div>`;}).join('')}
+    </div>
+    ${!list.length? emptyState('users','No clients found','Add your first client to get started'):''}`;
+}
+function viewClient(id){
+  const c=clientById(id); if(!c) return viewClients();
+  const matters=mattersOfClient(id);
+  const cm=clientMoneyOn()?clientFundsAvailable(id):null;
+  return `
+    ${pageTitle(esc(c.name), btnGhost('Edit client',`openClientForm('${id}')`,'pencil') + btnGhost('New matter',`openMatterForm('', '${id}')`,'briefcase') + (clientMoneyOn()?btnGhost('Client money', `navTo('money')`, 'landmark'):'') + btnGhost('Back','navTo(\'clients\')','arrow-left'))}
+    <div class="grid g3 mb4">
+      ${statCard('Matters', matters.length, '', 'briefcase')}
+      ${statCard('Total outstanding', fmtINR(round2(matters.reduce((s,m)=>s+matterOutstanding(m.id),0))), 'across all matters', 'wallet')}
+      ${cm!=null? statCard('Client funds held', fmtINR(cm), 'available for this client', 'landmark') : statCard('Unbilled value', fmtINR(round2(matters.reduce((s,m)=>s+matterUnbilledValue(m.id),0))), 'ready to invoice', 'clock')}
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(1,1fr);gap:24px">
+      <div class="card"><div class="cardhead"><span>Matters</span></div>
+        ${matters.length? `<div>${matters.map(m=>{
+          const out=matterOutstanding(m.id), unb=matterUnbilledValue(m.id);
+          return `<div class="rowline" style="cursor:pointer" onclick="navTo('matter','${m.id}')"><div class="grow"><div style="font-weight:600">${esc(m.title)}</div><div style="font-size:12px;color:#94a3b8;margin-top:2px"><span class="chip ${m.status==='closed'?'chip-gray':'chip-green'}">${m.status==='closed'?'Closed':'Open'}</span> · ${m.rateType==='hourly'?`${fmtINR(m.hourlyRate)}/hr`:(m.rateType==='fixed'?`Fixed fee ${fmtINR(m.fixedFee)}`:'Contingency')}</div></div><div style="text-align:right"><div style="font-weight:700;color:${out>0?'#dc2626':'#0f172a'}">${fmtINR(out)}</div><div style="font-size:11px;color:#94a3b8">outstanding · ${fmtINR(unb)} unbilled</div></div></div>`;}).join('')}</div>` : emptyState('briefcase','No matters for this client yet','Create a matter to start tracking work')}
+      </div>
+      <div class="card"><div class="cardhead"><span>Contact details</span></div><div class="cardbody" style="font-size:14px">
+        ${c.email?`<div class="flex gap2" style="margin-bottom:12px;color:#475569">${icon('mail','sm')} ${esc(c.email)}</div>`:''}
+        ${c.phone?`<div class="flex gap2" style="margin-bottom:12px;color:#475569">${icon('phone','sm')} ${esc(c.phone)}</div>`:''}
+        ${c.address?`<div class="flex gap2" style="margin-bottom:12px;color:#475569">${icon('map-pin','sm')} <span>${esc(c.address)}</span></div>`:''}
+        ${!c.email&&!c.phone&&!c.address? '<div style="color:#94a3b8">No contact details recorded.</div>':''}
+        <div style="font-size:12px;color:#94a3b8;border-top:1px solid #f1f5f9;margin-top:12px;padding-top:12px">Client since ${fmtDate(c.createdAt)}</div>
+      </div></div>
+    </div>`;
+}
+function openClientForm(id){
+  const c = id ? clientById(id) : null;
+  const J=juris();
+  modal(` ${modalHeader(c?'Edit client':'New client')}
+    <div class="modalbody">
+      ${field('Client / company name *', `<input id="cfName" class="input" value="${esc(c?c.name:'')}">`)}
+      <div class="grid g2">${field('Contact person', `<input id="cfPerson" class="input" value="${esc(c?c.contactPerson:'')}">`)}${field('Phone', `<input id="cfPhone" class="input" value="${esc(c?c.phone:'')}">`)}</div>
+      ${field('Email', `<input id="cfEmail" type="email" class="input" value="${esc(c?c.email:'')}">`)}
+      ${field(J.taxNoLabel, `<input id="cfGstin" class="input" placeholder="${J.code==='IN'?'22AAAAA0000A1Z5':''}" maxlength="20" value="${esc(c?c.gstin:'')}">`)}
+      ${field('Address', `<textarea id="cfAddress" class="textarea">${esc(c?c.address:'')}</textarea>`)}
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="saveClient('${id||''}')">${c?'Save changes':'Add client'}</button>`)}`);
+}
+function saveClient(id){
+  const name=$('#cfName').value.trim();
+  if(!name){ toast('Client name is required','error'); return; }
+  if(id){
+    const c=clientById(id);
+    if(!c){ toast('Client not found','error'); return; }
+    const before=clone(c);
+    Object.assign(c,{name, contactPerson:$('#cfPerson').value.trim(), phone:$('#cfPhone').value.trim(), email:$('#cfEmail').value.trim(), gstin:$('#cfGstin').value.trim().toUpperCase(), address:$('#cfAddress').value.trim()});
+    auditLogAdd('update','client',before,c,'Client: '+name); toast('Client updated');
+  } else {
+    const c={id:uid(), name, contactPerson:$('#cfPerson').value.trim(), phone:$('#cfPhone').value.trim(), email:$('#cfEmail').value.trim(), gstin:$('#cfGstin').value.trim().toUpperCase(), address:$('#cfAddress').value.trim(), createdAt:nowISO()};
+    db.clients.push(c); auditLogAdd('create','client',null,c,'Client: '+name); toast('Client added');
+  }
+  recordIntegrity(); saveDB(); closeModal(); renderApp();
+}
+function deleteClient(id){
+  if(mattersOfClient(id).length){ toast('Delete its matters first (or close them)','warn'); return; }
+  if(led().some(e=>e.clientId===id)){ toast('This client has ledger (client money) entries — cannot delete','warn'); return; }
+  if(!confirm('Permanently delete this client?')) return;
+  const c=clientById(id);
+  db.clients = db.clients.filter(x=>x.id!==id);
+  auditLogAdd('delete','client',c,null,'Client: '+(c?c.name:''));
+  recordIntegrity(); saveDB(); navTo('clients'); toast('Client deleted','info');
+}
+
+function viewMatters(){
+  const f = state.param && state.param.f ? state.param.f : 'all';
+  const clientF = state.param && state.param.c ? state.param.c : '';
+  const list = db.matters.filter(m=>{
+    const okF = f==='all' ? true : f==='open' ? m.status!=='closed' : f==='closed' ? m.status==='closed' : true;
+    const okC = !clientF || m.clientId===clientF;
+    return okF && okC;
+  }).sort((a,b)=>a.title.localeCompare(b.title));
+  const clientOpts = `<option value="">All clients</option>` + db.clients.map(c=>`<option value="${c.id}" ${clientF===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  return `
+    ${pageTitle('Matters', btnPrimary('New matter','openMatterForm()','briefcase'))}
+    <div class="flex wrap gap3 mb4">
+      <div class="flex" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:4px">${['all','open','closed'].map(x=>`<button onclick="navTo('matters',{f:'${x}',c:'${esc(clientF)}'})" class="btn ${f===x?'btn-dark':'btn-light'}" style="padding:6px 16px">${x==='all'?'All':x==='open'?'Open':'Closed'}</button>`).join('')}</div>
+      <select class="select" style="width:auto" onchange="navTo('matters',{f:'${f}',c:this.value})">${clientOpts}</select>
+    </div>
+    <div class="grid g3">
+      ${list.map(m=>{
+        const c=clientById(m.clientId);
+        const out=matterOutstanding(m.id), unb=matterUnbilledValue(m.id);
+        const unbilled = db.timeEntries.filter(t=>t.matterId===m.id).reduce((s,t)=>s+t.minutes,0);
+        const cm=clientMoneyOn()?clientFundsAvailableForMatter(m.id):null;
+        return `<div class="card" style="padding:20px;display:flex;flex-direction:column">
+          <div class="flex between" style="align-items:flex-start"><div><div class="flex gap2"><span class="chip ${m.status==='closed'?'chip-gray':'chip-green'}">${m.status==='closed'?'Closed':'Open'}</span><span style="font-size:11px;color:#94a3b8">${esc(c?c.name:'')}</span></div><div style="font-weight:700;margin-top:6px">${esc(m.title)}</div><div style="font-size:12px;color:#94a3b8;margin-top:2px">${m.rateType==='hourly'?`${fmtINR(m.hourlyRate)} / hour`:(m.rateType==='fixed'?`Fixed fee · ${fmtINR(m.fixedFee)}`:'Contingency fee')}</div></div><div class="flex gap1"><button class="iconbtn" onclick="navTo('matter','${m.id}')" title="Ledger">${icon('book-open','sm')}</button><button class="iconbtn" onclick="openMatterForm('${m.id}')" title="Edit">${icon('pencil','sm')}</button></div></div>
+          <div class="grid g3" style="border-top:1px solid #f1f5f9;margin-top:16px;padding-top:16px;text-align:center">
+            <div><div style="font-weight:800">${minsToHM(unbilled).split(' ')[0]}</div><div style="font-size:10px;color:#94a3b8;text-transform:uppercase">Logged</div></div>
+            <div><div style="font-weight:800;color:${unb>0?'#2563eb':'#94a3b8'}">${fmtINR(unb)}</div><div style="font-size:10px;color:#94a3b8;text-transform:uppercase">Unbilled</div></div>
+            <div><div style="font-weight:800;color:${out>0?'#dc2626':'#059669'}">${fmtINR(out)}</div><div style="font-size:10px;color:#94a3b8;text-transform:uppercase">Outstanding</div></div>
+            ${cm!=null? `<div style="grid-column:1/-1;border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#64748b">Client funds held (client account)</span><span style="font-weight:800;color:#0f172a">${fmtINR(cm)}</span></div>`:''}
+          </div>
+        </div>`;}).join('')}
+    </div>
+    ${!list.length? emptyState('briefcase','No matters match','Adjust filters or create a matter'):''}`;
+}
+function openMatterForm(id, presetClientId){
+  if(!db.clients.length){ toast('Add a client first','warn'); closeModal(); openClientForm(); return; }
+  const m = id ? matterById(id) : null;
+  const selClient = (m && m.clientId) || (!m ? (presetClientId || '') : '');
+  const opts = db.clients.map(c=>`<option value="${c.id}" ${selClient===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+  modal(` ${modalHeader(m?'Edit matter':'New matter')}
+    <div class="modalbody">
+      ${field('Client *', `<select id="mfClient" class="select" onchange="toggleRateType()">${opts}</select>`)}
+      ${field('Matter title / description *', `<input id="mfTitle" class="input" value="${esc(m?m.title:'')}">`)}
+      ${field('Notes', `<textarea id="mfNotes" class="textarea">${esc(m?m.notes:'')}</textarea>`)}
+      <div class="grid g3">
+        ${field('Billing type', `<select id="mfRateType" class="select" onchange="toggleRateType()"><option value="hourly" ${m&&m.rateType==='hourly'?'selected':''}>Hourly</option><option value="fixed" ${m&&m.rateType==='fixed'?'selected':''}>Fixed fee</option><option value="contingency" ${m&&m.rateType==='contingency'?'selected':''}>Contingency</option></select>`)}
+        <div id="mfHourlyWrap">${field('Rate /hour', `<input id="mfHourly" type="number" min="0" step="0.01" class="input" value="${m?m.hourlyRate:''}">`)}</div>
+        <div id="mfFixedWrap" class="hidden">${field('Fixed fee', `<input id="mfFixed" type="number" min="0" step="0.01" class="input" value="${m?m.fixedFee:''}">`)}</div>
+      </div>
+      ${field('Status', `<select id="mfStatus" class="select"><option value="open" ${!m||m.status==='open'?'selected':''}>Open</option><option value="closed" ${m&&m.status==='closed'?'selected':''}>Closed</option></select>`)}
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="saveMatter('${id||''}')">${m?'Save changes':'Create matter'}</button>`)}`);
+  toggleRateType();
+}
+function toggleRateType(){
+  const rt=$('#mfRateType'); if(!rt) return;
+  $('#mfHourlyWrap').classList.toggle('hidden', rt.value!=='hourly');
+  $('#mfFixedWrap').classList.toggle('hidden', rt.value!=='fixed');
+}
+function saveMatter(id){
+  const fClient=$('#mfClient'), fTitle=$('#mfTitle');
+  if(!fClient || !fTitle){ toast('Form not ready — please reopen','error'); return; }
+  const clientId=fClient.value, title=fTitle.value.trim();
+  if(!clientId){ toast('Choose a client','error'); return; }
+  if(!title){ toast('Matter title is required','error'); return; }
+  const rateType=$('#mfRateType').value;
+  const hourlyRate = rateType==='hourly' ? round2(parseFloat($('#mfHourly').value)||0) : 0;
+  const fixedFee = rateType==='fixed' ? round2(parseFloat($('#mfFixed').value)||0) : 0;
+  const status=$('#mfStatus').value;
+  const notes = $('#mfNotes') ? $('#mfNotes').value.trim() : '';
+  if(id){
+    const m=matterById(id);
+    if(!m){ toast('Matter not found','error'); return; }
+    const before=clone(m);
+    Object.assign(m,{clientId,title,notes,rateType,hourlyRate,fixedFee,status});
+    auditLogAdd('update','matter',before,m,'Matter: '+title); toast('Matter updated');
+  } else {
+    const m={id:uid(), clientId, title, notes, rateType, hourlyRate, fixedFee, status, openDate:todayISO(), closeDate:status==='closed'?todayISO():null, createdAt:nowISO()};
+    db.matters.push(m); auditLogAdd('create','matter',null,m,'Matter: '+title); toast('Matter created');
+  }
+  recordIntegrity(); saveDB(); closeModal(); renderApp();
+}
+function deleteMatter(id){
+  const busy = db.timeEntries.some(t=>t.matterId===id) || db.expenses.some(x=>x.matterId===id) || db.invoices.some(i=>i.matterId===id) || led().some(e=>e.matterId===id);
+  if(busy){ toast('Matter has entries/invoices/ledger activity — close it instead of deleting','warn'); return; }
+  if(!confirm('Delete this matter?')) return;
+  const m=matterById(id);
+  db.matters = db.matters.filter(x=>x.id!==id);
+  auditLogAdd('delete','matter',m,null,'Matter: '+(m?m.title:''));
+  recordIntegrity(); saveDB(); renderApp();
+}
+
+function timerRunning(){
+  if(!meta.timer || !meta.timer.running) return null;
+  let ms = (meta.timer.accumulatedMs||0) + (Date.now() - meta.timer.startedAt);
+  return Object.assign({}, meta.timer, {ms});
+}
+function timerElapsedTotal(){
+  const t=meta.timer; if(!t) return 0;
+  return t.running ? t.accumulatedMs + (Date.now()-t.startedAt) : t.accumulatedMs;
+}
+function viewTimer(){
+  const t = meta.timer;
+  const running = t && t.running;
+  const sols=db.settings.solicitors||[];
+  const defSol = (!t && sols.length===1) ? sols[0] : (t&&t.solicitor) || '';
+  const opts = `<option value="">Select matter…</option>` + openMatters().map(m=>{
+    const c=clientById(m.clientId);
+    return `<option value="${m.id}" ${t&&t.matterId===m.id?'selected':''}>${esc(m.title)} — ${esc(c?c.name:'')}</option>`;
+  }).join('');
+  const elapsed = timerElapsedTotal();
+  return `
+    ${pageTitle('Timer', btnGhost('Time entries','navTo(\'entries\')','clock'))}
+    <div style="max-width:672px;margin:0 auto">
+      <div class="card" style="overflow:hidden">
+        <div style="background:#0f172a;padding:32px;text-align:center"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:#94a3b8;margin-bottom:12px">${running?'Timer running':'Timer idle'}</div><div id="bigTimer" class="mono" style="font-size:56px;font-weight:800;color:#fff">${msToHMS(elapsed)}</div>${running? `<div style="margin-top:12px;font-size:12px;color:#fca5a5;display:inline-flex;align-items:center;gap:8px"><span class="dotred"></span>${esc(t.note||'')}</div>`:''}</div>
+        <div class="cardbody">
+          ${field('Matter', `<select id="tmMatter" class="select" ${running?'disabled':''}>${opts}</select>`)}
+          ${field('Work note (optional)', `<input id="tmNote" class="input" placeholder="e.g. Drafting, conference with client…" value="${esc(running?t.note:'')}" ${running?'disabled':''}>`)}
+          <div class="flex wrap gap3" style="padding-top:8px">
+            ${!running? `<button onclick="timerStart()" class="btn btn-green" style="flex:1;justify-content:center;padding:12px">${icon('play','sm')} Start</button>${t && t.accumulatedMs>0 ? `<button onclick="timerStop(true)" class="btn btn-dark" style="flex:1;justify-content:center;padding:12px">${icon('save','sm')} Save &amp; reset</button>`:''}` : `<button onclick="timerPause()" class="btn" style="flex:1;justify-content:center;padding:12px;background:#d97706;color:#fff">${icon('pause','sm')} Pause</button><button onclick="timerStop(false)" class="btn btn-dark" style="flex:1;justify-content:center;padding:12px">${icon('stop-circle','sm')} Stop &amp; save</button>`}
+          </div>
+          <div class="flex center gap3" style="background:#f8fafc;border-radius:12px;padding:12px 16px;margin-top:16px"><span style="font-size:14px;color:#64748b;font-weight:500">${solLabel()}</span><select id="tmSol" class="select" style="flex:1" ${running?'disabled':''}>${['',...sols].map(s=>`<option value="${esc(s)}" ${defSol===s?'selected':''}>${s?esc(s):'— Unassigned —'}</option>`).join('')}</select></div>
+          ${!running && t && t.accumulatedMs>0 && t.pausedAt ? `<div class="flex between" style="background:#f8fafc;border-radius:12px;padding:12px 16px;margin-top:12px;font-size:14px"><span style="color:#64748b">Paused at ${fmtDate(t.pausedAt)} · ${msToHMS(t.accumulatedMs)} elapsed</span><button class="btn btn-light" style="padding:4px 12px;color:#dc2626" onclick="timerDiscard()">Discard</button></div>`:''}
+        </div>
+      </div>
+      <p style="text-align:center;font-size:12px;color:#94a3b8;margin-top:16px">Timer keeps running even if you close the app — it resumes when you unlock.</p>
+    </div>`;
+}
+function timerStart(){
+  const matterId=$('#tmMatter').value;
+  if(!matterId){ toast('Select a matter first','warn'); return; }
+  const sols=db.settings.solicitors||[];
+  const sol = $('#tmSol') ? $('#tmSol').value : (sols.length===1?sols[0]:'');
+  meta.timer = { running:true, matterId, note:$('#tmNote').value.trim(), solicitor:sol, startedAt:Date.now(), accumulatedMs:0, pausedAt:null };
+  meta.integrity = computeDigest(); saveMeta();
+  startTimerTicker(); renderApp(); toast('Timer started');
+}
+function timerPause(){
+  const t=meta.timer; if(!t||!t.running) return;
+  t.accumulatedMs += Date.now()-t.startedAt;
+  t.running=false; t.pausedAt=nowISO();
+  clearInterval(topTicker); meta.integrity=computeDigest(); saveMeta(); renderApp();
+}
+function timerStop(saveAndReset){
+  const t=meta.timer; if(!t) return;
+  const totalMs = timerElapsedTotal();
+  if(totalMs < 60000){ toast('Timer ran less than a minute — entry not saved','warn'); meta.timer=null; saveMeta(); renderApp(); return; }
+  const minutes = Math.max(1, Math.round(totalMs/60000));
+  const matter=matterById(t.matterId);
+  const rate = (matter && matter.rateType==='hourly') ? matter.hourlyRate : 0;
+  const sols=db.settings.solicitors||[];
+  const sol = t.solicitor || (sols.length===1?sols[0]:'');
+  const entry={ id:uid(), matterId:t.matterId, solicitor:sol, date:todayISO(), startTime:null, endTime:null, minutes, description:t.note||'Timed work', billable: !!(matter && (matter.rateType==='hourly')), rateAtEntry: rate, invoiced:false, invoiceId:null, createdAt:nowISO() };
+  db.timeEntries.push(entry);
+  auditLogAdd('create','timeEntry',null,entry,'Timed work: '+minsToHM(minutes));
+  meta.timer = null; recordIntegrity(); saveDB();
+  if(saveAndReset){ toast(`Time entry saved (${minsToHM(minutes)})`); renderApp(); }
+  else { toast(`Time entry saved (${minsToHM(minutes)})`); navTo('matter', t.matterId); }
+}
+function timerDiscard(){
+  if(!confirm('Discard current timer session?')) return;
+  meta.timer=null; saveMeta(); renderApp();
+}
+setInterval(()=>{ const b=$('#bigTimer'); if(b && timerRunning()) b.textContent = msToHMS(timerElapsedTotal()); },1000);
+
+function viewTimeEntries(){
+  const f = state.param && state.param.f ? state.param.f : {};
+  const q = f.q||''; const matterF = f.m||''; const solF = f.s||''; const monthF = f.mo||'';
+  let list = db.timeEntries.filter(t=>{
+    if(q && !(t.description||'').toLowerCase().includes(q.toLowerCase())) return false;
+    if(matterF && t.matterId!==matterF) return false;
+    if(solF && t.solicitor!==solF) return false;
+    if(monthF && t.date.slice(0,7)!==monthF) return false;
+    return true;
+  }).sort((a,b)=> b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+  const matterOpts = `<option value="">All matters</option>` + db.matters.map(m=>`<option value="${m.id}" ${matterF===m.id?'selected':''}>${esc(m.title)}</option>`).join('');
+  const solSet = [...new Set(db.timeEntries.map(t=>t.solicitor).filter(Boolean))];
+  const solOpts = `<option value="">All ${esc(solLabel().toLowerCase())}s</option>` + solSet.map(s=>`<option value="${esc(s)}" ${solF===s?'selected':''}>${esc(s)}</option>`).join('');
+  const totalMin = list.reduce((s,t)=>s+t.minutes,0);
+  return `
+    ${pageTitle('Time Entries', btnPrimary('Add entry','openTimeForm()','plus'))}
+    <div class="card" style="padding:16px;margin-bottom:24px"><div class="grid g4">
+      ${field('Search', `<div class="flex" style="position:relative"><span style="position:absolute;left:12px;top:10px;color:#94a3b8">${icon('search','sm')}</span><input class="input" style="padding-left:38px" value="${esc(q)}" oninput="state.param={f:{...state.param?.f,q:this.value}};renderApp()"></div>`)}
+      ${field('Matter', `<select class="select" onchange="state.param={f:{...state.param?.f,m:this.value}};renderApp()">${matterOpts}</select>`)}
+      ${field(solLabel(), `<select class="select" onchange="state.param={f:{...state.param?.f,s:this.value}};renderApp()">${solOpts}</select>`)}
+      ${field('Month', `<input type="month" class="input" value="${monthF}" onchange="state.param={f:{...state.param?.f,mo:this.value}};renderApp()">`)}
+    </div></div>
+    <div class="card" style="overflow:hidden"><div class="cardhead"><span>Entries <span style="color:#94a3b8;font-weight:400">(${list.length})</span></span><span style="font-weight:600;color:#64748b">${minsToHM(totalMin)} total</span></div>
+      ${list.length? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Date</th><th>Matter</th><th>Description</th><th>${esc(solLabel())}</th><th class="r">Time</th><th class="r">Value</th><th class="c">Status</th><th></th></tr></thead><tbody>${list.map(t=>{
+        const m=matterById(t.matterId), c=m?clientById(m.clientId):null;
+        const val = round2((t.minutes/60)*t.rateAtEntry);
+        return `<tr><td style="white-space:nowrap;color:#64748b">${fmtDate(t.date)}</td><td><button style="background:none;border:0;font-weight:500;color:#0f172a;text-decoration:underline" onclick="navTo('matter','${t.matterId}')">${esc(m?m.title:'—')}</button><div style="font-size:12px;color:#94a3b8">${esc(c?c.name:'')}</div></td><td style="color:#475569;max-width:220px">${esc(t.description||'')}</td><td style="color:#64748b">${esc(t.solicitor||'—')}</td><td class="r" style="font-weight:600;white-space:nowrap">${minsToHM(t.minutes)}</td><td class="r">${t.billable?fmtINR(val):'<span style="color:#cbd5e1">—</span>'}</td><td class="c" style="white-space:nowrap">${t.invoiced? `<span class="chip chip-green">Invoiced</span>` : t.billable? `<span class="chip chip-blue">Billable</span>` : `<span class="chip chip-gray">Non-billable</span>`}</td><td class="r" style="white-space:nowrap">${t.invoiced? `<span style="color:#cbd5e1">${icon('lock','sm')}</span>` : `<button class="iconbtn" onclick="openTimeForm('${t.id}')">${icon('pencil','sm')}</button><button class="iconbtn" onclick="deleteTimeEntry('${t.id}')">${icon('trash-2','sm')}</button>`}</td></tr>`;}).join('')}</tbody></table></div>` : emptyState('clock','No entries found','Adjust filters or add an entry')}
+    </div>`;
+}
+function openTimeForm(id, presetMatterId){
+  const t = id ? db.timeEntries.find(x=>x.id===id) : null;
+  const matterId = t ? t.matterId : (presetMatterId || (state.param && state.param.m) || '');
+  const opts = `<option value="">Select matter…</option>` + openMatters().map(m=>`<option value="${m.id}" ${matterId===m.id?'selected':''}>${esc(m.title)} — ${esc(clientById(m.clientId)?clientById(m.clientId).name:'')}</option>`).join('');
+  const sols=db.settings.solicitors||[];
+  const defSol = (!t && sols.length===1) ? sols[0] : (t?t.solicitor:'');
+  const solOpts = ['',...sols].map(s=>`<option value="${esc(s)}" ${defSol===s?'selected':''}>${s?esc(s):'— Unassigned —'}</option>`).join('');
+  modal(` ${modalHeader(t?'Edit time entry':'Add time entry')}
+    <div class="modalbody">
+      ${field('Matter *', `<select id="teMatter" class="select">${opts}</select>`)}
+      <div class="grid g3">${field('Date', `<input id="teDate" type="date" class="input" value="${t?t.date:todayISO()}">`)}${field('Start', `<input id="teStart" type="time" class="input" value="${t?t.startTime||'':'09:00'}">`)}${field('End', `<input id="teEnd" type="time" class="input" value="${t?t.endTime||'':'10:00'}">`)}</div>
+      ${field('Duration (minutes) *', `<input id="teMinutes" type="number" min="1" class="input" value="${t?t.minutes:60}">`)}
+      ${field('Description / work done', `<textarea id="teDesc" class="textarea" placeholder="e.g. Drafting, research, court appearance…">${esc(t?t.description:'')}</textarea>`)}
+      <div class="grid g3">${field(solLabel(), `<select id="teSol" class="select">${solOpts}</select>`)}${field('Rate /hour', `<input id="teRate" type="number" min="0" step="0.01" class="input" value="${t?t.rateAtEntry:''}">`)}${field('Billable', `<select id="teBillable" class="select"><option value="1" ${!t || t.billable?'selected':''}>Yes</option><option value="0" ${t&&!t.billable?'selected':''}>No</option></select>`)}</div>
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="saveTimeEntry('${id||''}')">${t?'Save changes':'Add entry'}</button>`)}`);
+  ['teStart','teEnd'].forEach(idn=>{ const el=$('#'+idn); if(el) el.addEventListener('change',()=>{
+    const s=$('#teStart').value, e=$('#teEnd').value;
+    if(s&&e){ const [sh,sm]=s.split(':').map(Number); const [eh,em]=e.split(':').map(Number);
+      let mins=(eh*60+em)-(sh*60+sm); if(mins<=0) mins+=1440; $('#teMinutes').value = mins; }
+  }); });
+  $('#teMatter').addEventListener('change',()=>{
+    const m=matterById($('#teMatter').value);
+    if(m && m.rateType==='hourly' && !t) $('#teRate').value = m.hourlyRate;
+  });
+}
+function saveTimeEntry(id){
+  const matterId=$('#teMatter').value;
+  if(!matterId){ toast('Select a matter','error'); return; }
+  const minutes = Math.max(1, Math.round(parseFloat($('#teMinutes').value)||0));
+  const rate = round2(parseFloat($('#teRate').value)||0);
+  const billable = $('#teBillable').value==='1';
+  const data = { matterId, date:$('#teDate').value, startTime:$('#teStart').value||null, endTime:$('#teEnd').value || null, minutes, description:$('#teDesc').value.trim(), solicitor:$('#teSol').value, billable, rateAtEntry:rate };
+  if(id){
+    const t=db.timeEntries.find(x=>x.id===id);
+    if(!t){ toast('Entry not found','error'); return; }
+    const before=clone(t); Object.assign(t,data); auditLogAdd('update','timeEntry',before,t,'Time entry updated'); toast('Entry updated');
+  } else {
+    const t=Object.assign({id:uid(), invoiced:false, invoiceId:null, createdAt:nowISO()}, data);
+    db.timeEntries.push(t); auditLogAdd('create','timeEntry',null,t,'Time entry added'); toast('Entry added');
+  }
+  recordIntegrity(); saveDB(); closeModal(); renderApp();
+}
+function deleteTimeEntry(id){
+  const t=db.timeEntries.find(x=>x.id===id);
+  if(t && t.invoiced){ toast('This entry is on an invoice — void the invoice first','warn'); return; }
+  if(!confirm('Delete this time entry?')) return;
+  db.timeEntries = db.timeEntries.filter(x=>x.id!==id);
+  auditLogAdd('delete','timeEntry',t,null,'Time entry deleted');
+  recordIntegrity(); saveDB(); renderApp(); toast('Entry deleted','info');
+}
+
+const EXP_CATEGORIES = ['Court fees','Process & filing','Photocopy / printing','Courier','Travel / conveyance','Expert charges','Other',''];
+function viewExpenses(){
+  const f = (state.param && state.param.f) || {};
+  const q=f.q||''; const matterF=f.m||''; const catF=f.c||'';
+  let list = db.expenses.filter(x=>{
+    if(q && !(x.description||'').toLowerCase().includes(q.toLowerCase())) return false;
+    if(matterF && x.matterId!==matterF) return false;
+    if(catF && x.category!==catF) return false;
+    return true;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  const matterOpts = `<option value="">All matters</option>` + db.matters.map(m=>`<option value="${m.id}" ${matterF===m.id?'selected':''}>${esc(m.title)}</option>`).join('');
+  const catOpts = `<option value="">All categories</option>` + EXP_CATEGORIES.filter(Boolean).map(c=>`<option value="${esc(c)}" ${catF===c?'selected':''}>${esc(c)}</option>`).join('');
+  const total = list.reduce((s,x)=>s+x.amount,0);
+  return `
+    ${pageTitle('Expenses', btnPrimary('Add expense','openExpenseForm()','plus'))}
+    <div class="card" style="padding:16px;margin-bottom:24px"><div class="grid g3">
+      ${field('Search', `<div class="flex" style="position:relative"><span style="position:absolute;left:12px;top:10px;color:#94a3b8">${icon('search','sm')}</span><input class="input" style="padding-left:38px" value="${esc(q)}" oninput="state.param={f:{...state.param?.f,q:this.value}};renderApp()"></div>`)}
+      ${field('Matter', `<select class="select" onchange="state.param={f:{...state.param?.f,m:this.value}};renderApp()">${matterOpts}</select>`)}
+      ${field('Category', `<select class="select" onchange="state.param={f:{...state.param?.f,c:this.value}};renderApp()">${catOpts}</select>`)}
+    </div></div>
+    <div class="card" style="overflow:hidden"><div class="cardhead"><span>Expenses <span style="color:#94a3b8;font-weight:400">(${list.length})</span></span><span style="font-weight:600;color:#64748b">${fmtINR(total)} total</span></div>
+      ${list.length? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Date</th><th>Matter</th><th>Category</th><th>Description</th><th class="r">Amount</th><th class="c">Status</th><th></th></tr></thead><tbody>${list.map(x=>{
+        const m=matterById(x.matterId), c=m?clientById(m.clientId):null;
+        return `<tr><td style="white-space:nowrap;color:#64748b">${fmtDate(x.date)}</td><td><button style="background:none;border:0;font-weight:500;color:#0f172a;text-decoration:underline" onclick="navTo('matter','${x.matterId}')">${esc(m?m.title:'—')}</button><div style="font-size:12px;color:#94a3b8">${esc(c?c.name:'')}</div></td><td><span class="chip chip-gray">${esc(x.category||'Other')}</span></td><td style="color:#475569;max-width:200px">${esc(x.description||'')}</td><td class="r" style="font-weight:700">${fmtINR(x.amount)}</td><td class="c" style="white-space:nowrap">${x.invoiced? `<span class="chip chip-green">Invoiced</span>` : x.billable? `<span class="chip chip-blue">Billable</span>` : `<span class="chip chip-gray">Internal</span>`}</td><td class="r" style="white-space:nowrap">${x.invoiced? `<span style="color:#cbd5e1">${icon('lock','sm')}</span>` : `<button class="iconbtn" onclick="openExpenseForm('${x.id}')">${icon('pencil','sm')}</button><button class="iconbtn" onclick="deleteExpense('${x.id}')">${icon('trash-2','sm')}</button>`}</td></tr>`;}).join('')}</tbody></table></div>` : emptyState('receipt','No expenses found','Add an expense to record disbursements')}
+    </div>`;
+}
+function openExpenseForm(id, presetMatterId){
+  const x = id ? db.expenses.find(e=>e.id===id) : null;
+  const matterId = x ? x.matterId : (presetMatterId || (state.param && state.param.m) || '');
+  const opts = `<option value="">Select matter…</option>` + db.matters.map(m=>`<option value="${m.id}" ${matterId===m.id?'selected':''}>${esc(m.title)}</option>`).join('');
+  const catOpts = EXP_CATEGORIES.map(c=>`<option value="${esc(c)}" ${(x?x.category:'')===c?'selected':''}>${c?esc(c):'Other'}</option>`).join('');
+  modal(` ${modalHeader(x?'Edit expense':'Add expense')}
+    <div class="modalbody">
+      ${field('Matter *', `<select id="exMatter" class="select">${opts}</select>`)}
+      <div class="grid g3">${field('Date', `<input id="exDate" type="date" class="input" value="${x?x.date:todayISO()}">`)}${field('Category', `<select id="exCat" class="select">${catOpts}</select>`)}${field('Amount *', `<input id="exAmount" type="number" min="0" step="0.01" class="input" value="${x?x.amount:''}">`)}</div>
+      ${field('Description', `<textarea id="exDesc" class="textarea" placeholder="e.g. Court fee stamp, courier charges…">${esc(x?x.description:'')}</textarea>`)}
+      ${field('Billable to client?', `<select id="exBillable" class="select"><option value="1" ${!x || x.billable?'selected':''}>Yes — include on invoice</option><option value="0" ${x&&!x.billable?'selected':''}>No — internal cost</option></select>`)}
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="saveExpense('${id||''}')">${x?'Save changes':'Add expense'}</button>`)}`);
+}
+function saveExpense(id){
+  const matterId=$('#exMatter').value;
+  if(!matterId){ toast('Select a matter','error'); return; }
+  const amount = round2(parseFloat($('#exAmount').value)||0);
+  if(amount<=0){ toast('Enter a valid amount','error'); return; }
+  const data = { matterId, date:$('#exDate').value, category:$('#exCat').value, amount, description:$('#exDesc').value.trim(), billable:$('#exBillable').value==='1' };
+  if(id){
+    const x=db.expenses.find(e=>e.id===id);
+    if(!x){ toast('Expense not found','error'); return; }
+    const before=clone(x); Object.assign(x,data); auditLogAdd('update','expense',before,x,'Expense updated'); toast('Expense updated');
+  } else {
+    const x=Object.assign({id:uid(), invoiced:false, invoiceId:null, createdAt:nowISO()}, data);
+    db.expenses.push(x); auditLogAdd('create','expense',null,x,'Expense added'); toast('Expense added');
+  }
+  recordIntegrity(); saveDB(); closeModal(); renderApp();
+}
+function deleteExpense(id){
+  const x=db.expenses.find(e=>e.id===id);
+  if(x && x.invoiced){ toast('This expense is on an invoice — void the invoice first','warn'); return; }
+  if(!confirm('Delete this expense?')) return;
+  db.expenses = db.expenses.filter(e=>e.id!==id);
+  auditLogAdd('delete','expense',x,null,'Expense deleted');
+  recordIntegrity(); saveDB(); renderApp(); toast('Expense deleted','info');
+}
+
+function viewMatter(id){
+  const m=matterById(id); if(!m) return viewMatters();
+  const c=clientById(m.clientId);
+  const rows=[];
+  db.timeEntries.filter(t=>t.matterId===id).forEach(t=>rows.push({date:t.date, kind:'time', label:t.description||'Time entry', ref:t.solicitor?solLabel()+': '+t.solicitor:'', debit:null, credit:null, info:minsToHM(t.minutes)}));
+  db.expenses.filter(x=>x.matterId===id).forEach(x=>rows.push({date:x.date, kind:'expense', label:x.description||x.category||'Expense', ref:x.category, debit:null, credit:null, info:fmtINR(x.amount)}));
+  db.invoices.filter(i=>i.matterId===id && i.status!=='void').forEach(inv=>{
+    rows.push({date:inv.date, kind:'invoice', label:'Invoice issued', ref:inv.number, debit:inv.total, credit:null, info:fmtINR(inv.total)});
+    (inv.payments||[]).forEach(p=>rows.push({date:p.date, kind:'payment', label:'Payment received', ref:(p.receiptNo||''), debit:null, credit:p.amount, info:fmtINR(p.amount)}));
+  });
+  rows.sort((a,b)=> a.date===b.date ? (a.kind==='time'?0:a.kind==='expense'?1:a.kind==='invoice'?2:3)-(b.kind==='time'?0:b.kind==='expense'?1:b.kind==='invoice'?2:3) : a.date.localeCompare(b.date));
+  let bal=0;
+  const body = rows.map(r=>{
+    if(r.debit!=null) bal=round2(bal+r.debit);
+    if(r.credit!=null) bal=round2(bal-r.credit);
+    const iconN = r.kind==='time'?'clock':r.kind==='expense'?'receipt':r.kind==='invoice'?'file-text':'arrow-up-right';
+    return `<tr><td style="white-space:nowrap;color:#64748b">${fmtDate(r.date)}</td><td><div class="flex gap2"><span style="width:28px;height:28px;border-radius:8px;background:${r.kind==='invoice'?'#fef2f2':r.kind==='payment'?'#ecfdf5':'#f1f5f9'};display:flex;align-items:center;justify-content:center;color:${r.kind==='invoice'?'#dc2626':r.kind==='payment'?'#059669':'#94a3b8'}">${icon(iconN,'sm')}</span><div><div style="font-weight:500;font-size:14px">${esc(r.label)}</div><div style="font-size:11px;color:#94a3b8">${esc(r.ref||r.info)}</div></div></div></td><td class="r" style="white-space:nowrap">${r.debit!=null?`<span style="font-weight:600">${fmtINR(r.debit)}</span>`:''}</td><td class="r" style="white-space:nowrap">${r.credit!=null?`<span style="font-weight:600;color:#059669">${fmtINR(r.credit)}</span>`:''}</td><td class="r" style="white-space:nowrap;font-weight:700;color:${bal>0.005?'#dc2626':bal<-0.005?'#059669':'#94a3b8'}">${fmtINR(bal)}</td></tr>`;
+  }).join('');
+  const out=matterOutstanding(id), unb=matterUnbilledValue(id);
+  const cm=clientMoneyOn()?clientFundsAvailableForMatter(id):null;
+  return `
+    ${pageTitle('Matter ledger', btnPrimary('Invoice this matter', `navTo('invoiceBuilder', '${id}')`, 'file-plus-2') + btnPrimary('Time entry', `openTimeForm('', '${id}')`, 'plus') + btnPrimary('Expense', `openExpenseForm('', '${id}')`, 'plus') + (clientMoneyOn()?btnGhost('Client money', `navTo('money')`, 'landmark'):'') + btnGhost('All matters', `navTo('matters')`, 'arrow-left'))}
+    <div class="grid g3 mb4">
+      ${statCard('Outstanding', fmtINR(out), out>0?'amount due':'fully settled', 'wallet')}
+      ${statCard('Unbilled', fmtINR(unb), 'ready to invoice', 'clock')}
+      ${statCard('Billing basis', m.rateType==='hourly'?fmtINR(m.hourlyRate)+'/hr':m.rateType==='fixed'?fmtINR(m.fixedFee):'Contingency', m.status==='closed'?'Matter closed':'Open matter', 'briefcase')}
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(1,1fr);gap:24px">
+      <div class="card" style="overflow:hidden">
+        <div class="cardhead"><div><div style="font-weight:700">${esc(m.title)}</div><div style="font-size:12px;color:#94a3b8;font-weight:400">${esc(c?c.name:'')} · Open ${fmtDate(m.openDate)} ${m.status==='closed'?'· Closed '+fmtDate(m.closeDate):''}</div></div><span class="chip ${m.status==='closed'?'chip-gray':'chip-green'}">${m.status==='closed'?'Closed':'Open'}</span></div>
+        <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Date</th><th>Activity</th><th class="r">Debit</th><th class="r">Credit</th><th class="r">Balance</th></tr></thead><tbody>${body || `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:40px">No activity yet — start the timer or add an entry</td></tr>`}</tbody></table></div>
+        <div class="flex between" style="padding:12px 20px;border-top:1px solid #f1f5f9;font-size:14px"><span style="color:#64748b;font-weight:500">Ledger balance</span><span style="font-weight:800;color:${out>0.005?'#dc2626':'#059669'}">${fmtINR(bal)}</span></div>
+      </div>
+      <div class="card"><div class="cardhead"><span>Matter details</span></div><div class="cardbody" style="font-size:14px">
+        <div class="flex between" style="margin-bottom:12px"><span style="color:#64748b">Client</span><span style="font-weight:500">${esc(c?c.name:'—')}</span></div>
+        <div class="flex between" style="margin-bottom:12px"><span style="color:#64748b">Billing</span><span style="font-weight:500">${m.rateType==='hourly'?fmtINR(m.hourlyRate)+' / hour':m.rateType==='fixed'?'Fixed fee '+fmtINR(m.fixedFee):'Contingency'}</span></div>
+        ${cm!=null? `<div class="flex between" style="margin-bottom:12px"><span style="color:#64748b">Client funds held</span><span style="font-weight:700;color:#0f172a">${fmtINR(cm)}</span></div>`:''}
+        <div class="flex between" style="margin-bottom:12px"><span style="color:#64748b">Opened</span><span style="font-weight:500">${fmtDate(m.openDate)}</span></div>
+        ${m.notes?`<div style="border-top:1px solid #f1f5f9;padding-top:12px;color:#475569">${esc(m.notes)}</div>`:''}
+      </div></div>
+      <div class="card"><div class="cardhead"><span>Invoices</span></div><div>
+        ${db.invoices.filter(i=>i.matterId===id).sort((a,b)=>b.date.localeCompare(a.date)).map(inv=>`<button class="rowline" style="width:100%;background:none;border:0;border-bottom:1px solid #f1f5f9;text-align:left" onclick="navTo('invoice','${inv.id}')"><div class="grow"><div style="font-weight:600;font-size:14px">${esc(inv.number)}</div><div style="font-size:11px;color:#94a3b8">${fmtDate(inv.date)}</div></div><div style="text-align:right"><div style="font-weight:700;font-size:14px">${fmtINR(inv.total)}</div>${invoiceStatusChip(inv)}</div></button>`).join('') || `<div class="empty">No invoices yet</div>`}
+      </div></div>
+    </div>`;
+}
+
+function viewMoney(){
+  const J=juris();
+  const officeBank=bal('bank','Office Bank');
+  const clientBank=bal('bank','Client Bank');
+  const clientLedgerTotal=bal('client','Client Ledger');
+  const owedToClients=Math.max(0,-clientLedgerTotal);
+  const clientOpts = `<option value="">— select client —</option>` + db.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const matterOpts = `<option value="">— optional matter —</option>` + db.matters.filter(m=>m.status!=='closed').map(m=>{
+    const c=clientById(m.clientId);
+    return `<option value="${m.id}" data-client="${m.clientId}">${esc(m.title)} — ${esc(c?c.name:'')}</option>`;
+  }).join('');
+  const jmeta=(db.journalMeta||[]).slice().reverse().slice(0,40);
+  const linesBy = jid => led().filter(e=>e.jid===jid);
+  const perClient = db.clients.map(c=>({c, avail:clientFundsAvailable(c.id), bank:clientBankBalance(c.id)})).filter(x=>x.avail>0 || x.bank!==0);
+  return `
+    ${pageTitle('Client Money', btnGhost('Office expense','officeExpenseModal()','receipt'))}
+    <div class="grid g4 mb4">
+      ${statCard('Client bank balance', fmtINR(clientBank), 'segregated client accounts', 'banknote')}
+      ${statCard('Client ledger (owed to clients)', fmtINR(owedToClients), 'liability to clients', 'wallet')}
+      ${statCard('Office bank balance', fmtINR(officeBank), 'firm money', 'landmark')}
+      ${statCard('Client funds held', fmtINR(round2(db.clients.reduce((s,c)=>s+clientFundsAvailable(c.id),0))), 'across all clients', 'scale')}
+    </div>
+    <div class="card mb4">
+      <div class="cardhead"><span>Record transaction</span></div>
+      <div class="cardbody">
+        <div class="grid g4">
+          ${field('Type', `<select id="cmType" class="select" onchange="cmTypeChanged()"><option value="receive">Receive client funds</option><option value="transfer">Transfer to office (earned fees)</option><option value="disburse">Disburse from client funds</option></select>`)}
+          ${field('Client *', `<select id="cmClient" class="select" onchange="cmClientChanged()">${clientOpts}</select>`)}
+          ${field('Matter (optional)', `<select id="cmMatter" class="select">${matterOpts}</select>`)}
+          ${field('Amount *', `<input id="cmAmount" type="number" min="0" step="0.01" class="input" placeholder="0.00">`)}
+        </div>
+        <div class="grid g3" style="margin-top:16px">
+          ${field('Category / reference', `<input id="cmRef" class="input" placeholder="e.g. UPI / VAT / court fee">`)}
+          ${field('Date', `<input id="cmDate" type="date" class="input" value="${todayISO()}">`)}
+          ${field('Memo', `<input id="cmMemo" class="input" placeholder="Optional note">`)}
+        </div>
+        <button class="btn btn-dark" style="margin-top:8px" onclick="cmSubmit()">${icon('check','sm')} Post journal entry</button>
+        <div style="background:#f8fafc;border-radius:12px;padding:12px 16px;font-size:12px;color:#475569;margin-top:16px;line-height:1.5">${icon('info','sm')} <b>3-way posting, per client.</b> Each transaction posts to the <b>Client ledger</b>, <b>Office ledger</b>, and <b>Bank</b> books at the client level (matter optional) per regulatory rules: ${esc(J.clientReg)}</div>
+      </div>
+    </div>
+    ${perClient.length? `<div class="card mb4"><div class="cardhead"><span>Client balances</span></div><div class="cardbody"><div class="grid g3">${perClient.map(({c,avail,bank})=>`<div style="background:#f8fafc;border-radius:12px;padding:12px"><div style="font-weight:600;font-size:14px">${esc(c.name)}</div><div class="flex between" style="font-size:12px;color:#64748b;margin-top:8px"><span>Available</span><span style="font-weight:700;color:#0f172a">${fmtINR(avail)}</span></div><div class="flex between" style="font-size:12px;color:#64748b"><span>Client bank</span><span style="font-weight:700;color:#0f172a">${fmtINR(bank)}</span></div></div>`).join('')}</div></div></div>`:''}
+    <div class="card">
+      <div class="cardhead"><span>Recent journal entries <span style="color:#94a3b8;font-weight:400">(${jmeta.length})</span></span></div>
+      <div style="max-height:480px;overflow-y:auto">
+        ${jmeta.length? jmeta.map(jm=>{
+          const ls=linesBy(jm.id);
+          const c=jm.clientId?clientById(jm.clientId):null;
+          const m=jm.matterId?matterById(jm.matterId):null;
+          return `<details class="summaryrow" style="border-bottom:1px solid #f1f5f9;padding:0 20px">
+            <summary><span><span style="font-weight:600;font-size:14px">${esc(jm.desc)}</span><span style="display:block;font-size:12px;color:#94a3b8">${esc(jm.ref||'')} · ${fmtDate(jm.date)} · ${esc(c?c.name:'Office')}${m?' · '+esc(m.title):''}</span></span><span style="font-size:12px;color:#64748b" class="mono">${fmtINR(ls.reduce((s,l)=>s+l.amount,0)/2)}</span></summary>
+            <div style="padding:8px 0 16px 8px"><table class="tbl"><thead><tr><th>Book</th><th>Account</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead><tbody>${ls.map(l=>`<tr><td style="text-transform:capitalize">${l.side}</td><td>${esc(l.account)}</td><td class="r">${l.dir==='d'?fmtINR(l.amount):''}</td><td class="r">${l.dir==='c'?fmtINR(l.amount):''}</td></tr>`).join('')}</tbody></table></div>
+          </details>`;}).join('') : emptyState('landmark','No client-money transactions yet','Record client funds, transfers, and disbursements above')}
+      </div>
+    </div>`;
+}
+function cmTypeChanged(){
+  const t=$('#cmType').value;
+  const ref=$('#cmRef');
+  if(ref) ref.placeholder = t==='receive' ? 'e.g. UPI / NEFT / cheque' : t==='transfer' ? 'e.g. INV-2026-0001' : 'e.g. court fee, courier';
+}
+function cmClientChanged(){
+  const cid=$('#cmClient').value;
+  const sel=$('#cmMatter');
+  [...sel.options].forEach(o=>{ o.disabled = o.dataset.client && o.dataset.client!==cid; });
+  if(sel.value){ const o=sel.options[sel.selectedIndex]; if(o && o.disabled) sel.value=''; }
+}
+function cmSubmit(){
+  const t=$('#cmType').value;
+  const clientId=$('#cmClient').value;
+  const matterId=$('#cmMatter').value || null;
+  const amount=round2(parseFloat($('#cmAmount').value)||0);
+  const date=$('#cmDate').value||todayISO();
+  const ref=$('#cmRef').value.trim();
+  const memo=$('#cmMemo').value.trim();
+  if(!clientId){ toast('Select a client','error'); return; }
+  if(amount<=0){ toast('Enter a positive amount','error'); return; }
+  if(matterId){ const m=matterById(matterId); if(m && m.clientId!==clientId){ toast('Matter does not belong to this client','error'); return; } }
+  if(t==='receive') receiveClientMoney(clientId, matterId, amount, ref||'Bank transfer', memo, date);
+  else if(t==='transfer') transferToOffice(clientId, matterId, amount, memo||'Transfer to office', date);
+  else disburseFromClient(clientId, matterId, amount, ref, memo, date);
+  renderApp();
+}
+function officeExpenseModal(){
+  modal(` ${modalHeader('Office expense')}
+    <div class="modalbody">
+      <div class="grid g2">
+        ${field('Amount *', `<input id="oeAmt" type="number" min="0" step="0.01" class="input">`)}
+        ${field('Category', `<select id="oeCat" class="select">${EXP_CATEGORIES.filter(Boolean).map(c=>`<option>${esc(c)}</option>`).join('')}</select>`)}
+      </div>
+      ${field('Reference', `<input id="oeRef" class="input" placeholder="Optional">`)}
+      ${field('Date', `<input id="oeDate" type="date" class="input" value="${todayISO()}">`)}
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="saveOfficeExpense()">Post entry</button>`)}`);
+}
+function saveOfficeExpense(){
+  const amount=round2(parseFloat($('#oeAmt').value)||0);
+  const cat=$('#oeCat').value, ref=$('#oeRef').value.trim(), date=$('#oeDate').value||todayISO();
+  if(amount<=0){ toast('Enter a positive amount','error'); return; }
+  officeExpense(amount, cat, ref, date);
+  closeModal(); renderApp();
+}
+
+function viewInvoices(){
+  const list=[...db.invoices].sort((a,b)=>b.date.localeCompare(a.date));
+  const totalOut=round2(list.filter(i=>i.status==='issued').reduce((s,i)=>s+invoiceBalance(i),0));
+  const totalInv=round2(list.filter(i=>i.status!=='void').reduce((s,i)=>s+i.total,0));
+  return `
+    ${pageTitle('Invoices', btnPrimary('New invoice','navTo(\'invoiceBuilder\')','file-plus-2'))}
+    <div class="grid g3 mb4">
+      ${statCard('Total invoiced', fmtINR(totalInv), 'net of voided', 'file-text')}
+      ${statCard('Outstanding', fmtINR(totalOut), 'unpaid balance', 'wallet')}
+      ${statCard('Drafts', db.invoices.filter(i=>i.status==='draft').length, 'not yet issued', 'edit-3')}
+    </div>
+    <div class="card" style="overflow:hidden">
+      ${list.length? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Invoice</th><th>Client / Matter</th><th>Date</th><th class="r">Total</th><th class="r">Balance</th><th class="c">Status</th><th class="r">Actions</th></tr></thead><tbody>${list.map(inv=>{
+        const m=matterById(inv.matterId), c=m?clientById(m.clientId):null;
+        return `<tr><td><button style="background:none;border:0;font-weight:700;color:#0f172a;text-decoration:underline" onclick="navTo('invoice','${inv.id}')">${esc(inv.number)}</button>${inv.status==='draft'?'<div style="font-size:11px;color:#b45309;font-weight:600">Draft</div>':''}</td><td><div style="font-weight:500">${esc(c?c.name:'')}</div><div style="font-size:12px;color:#94a3b8">${esc(m?m.title:'')}</div></td><td style="color:#64748b;white-space:nowrap">${fmtDate(inv.date)}</td><td class="r" style="font-weight:700">${fmtINR(inv.total)}</td><td class="r" style="font-weight:600;color:${invoiceBalance(inv)>0?'#dc2626':'#059669'}">${inv.status==='void'?'—':fmtINR(invoiceBalance(inv))}</td><td class="c">${invoiceStatusChip(inv)}</td><td class="r" style="white-space:nowrap"><button class="iconbtn" onclick="navTo('invoice','${inv.id}')" title="View">${icon('eye','sm')}</button>${inv.status==='issued'&&invoiceBalance(inv)>0? `<button class="iconbtn" onclick="openPaymentForm('${inv.id}')" title="Record payment">${icon('banknote','sm')}</button>`:''}${inv.status!=='void'? `<button class="iconbtn" onclick="voidInvoice('${inv.id}')" title="Void">${icon('x-circle','sm')}</button>`:''}</td></tr>`;}).join('')}</tbody></table></div>` : emptyState('file-text','No invoices yet','Create an invoice from a matter with billable work')}
+    </div>`;
+}
+
+let builderState = { matterId:'', items:[], taxRate:18, taxType:'cgst' };
+function viewInvoiceBuilder(presetMatterId){
+  const J=juris();
+  builderState.matterId = presetMatterId || builderState.matterId;
+  if(!J.rates.includes(builderState.taxRate)) builderState.taxRate=J.defRate;
+  if(!J.modes.some(mo=>mo.id===builderState.taxType)) builderState.taxType=J.defMode;
+  const taxEnabled = taxOn();
+  const matterId = builderState.matterId;
+  const timeCands = db.timeEntries.filter(t=> !t.invoiced && t.billable && (!matterId || t.matterId===matterId)).sort((a,b)=>a.date.localeCompare(b.date));
+  const expCands = db.expenses.filter(x=> !x.invoiced && x.billable && (!matterId || x.matterId===matterId)).sort((a,b)=>a.date.localeCompare(b.date));
+  const opts = `<option value="">— select matter —</option>` + db.matters.map(m=>{
+    const c=clientById(m.clientId);
+    return `<option value="${m.id}" ${matterId===m.id?'selected':''}>${esc(m.title)} — ${esc(c?c.name:'')}</option>`;
+  }).join('');
+  const itemsHtml = builderState.items.length? builderState.items.map((it,idx)=>`
+    <div class="flex center gap2" style="background:#f8fafc;border-radius:12px;padding:8px 12px;font-size:14px"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${it.kind==='manual'?'#d97706':it.kind==='time'?'#3b82f6':'#10b981'}"></span><span class="grow" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.desc)}</span><span style="font-weight:600">${fmtINR(it.amount)}</span><button class="iconbtn" onclick="builderRemoveItem(${idx})">${icon('x','sm')}</button></div>`).join('') : `<p style="text-align:center;color:#94a3b8;font-size:14px;padding:8px">Choose entries below to add them</p>`;
+  const M = computeBuilderTotals();
+  const rateOpts = J.rates.map(r=>`<option value="${r}" ${builderState.taxRate===r?'selected':''}>${r}%</option>`).join('');
+  const modeOpts = J.modes.map(mo=>`<option value="${mo.id}" ${builderState.taxType===mo.id?'selected':''}>${mo.label}</option>`).join('');
+  return `
+    ${pageTitle('Create invoice', btnGhost('Cancel','navTo(\'invoices\')','x') + `<button class="btn btn-light" onclick="saveInvoice(false)">${icon('file-down','sm')} Save draft</button>` + `<button class="btn btn-dark" onclick="saveInvoice(true)">${icon('check','sm')} Issue invoice</button>`)}
+    <div class="grid" style="grid-template-columns:repeat(1,1fr);gap:24px">
+      <div class="card"><div class="cardhead">1 · Select matter</div><div class="cardbody"><select id="invMatter" class="select" onchange="builderState.matterId=this.value;builderState.items=[];renderApp()">${opts}</select>${!matterId?`<p style="font-size:14px;color:#94a3b8;margin-top:12px">Entries listed below come from the selected matter.</p>`:''}</div></div>
+      <div class="card"><div class="cardhead"><span>2 · Billable items <span style="color:#94a3b8;font-weight:400">(unbilled)</span></span><button class="btn btn-light" style="padding:4px 12px" onclick="builderAddAll()">Add all</button></div><div class="cardbody">
+        ${matterId? `<div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:8px">Time — ${timeCands.filter(t=>t.matterId===matterId).length} available</div><div style="margin-bottom:20px">${timeCands.filter(t=>t.matterId===matterId).map(t=>{
+          const val=round2((t.minutes/60)*t.rateAtEntry);
+          const inState = builderState.items.some(it=>it.refId===t.id);
+          return `<label class="flex center gap3" style="border:1px solid ${inState?'#0f172a':'#e2e8f0'};background:${inState?'#f8fafc':'#fff'};border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer"><input type="checkbox" style="accent-color:#0f172a" ${inState?'checked':''} onchange="builderToggle('time','${t.id}')"><span class="grow"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px">${esc(t.description||'Time entry')}</span><span style="display:block;font-size:11px;color:#94a3b8">${fmtDate(t.date)} · ${minsToHM(t.minutes)} · ${esc(t.solicitor||'unassigned')}</span></span><span style="font-weight:600;font-size:14px">${fmtINR(val)}</span></label>`;}).join('') || `<p style="font-size:14px;color:#94a3b8">No billable time available.</p>`}</div><div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:8px">Expenses — ${expCands.filter(x=>x.matterId===matterId).length} available</div><div>${expCands.filter(x=>x.matterId===matterId).map(x=>{
+          const inState = builderState.items.some(it=>it.refId===x.id);
+          return `<label class="flex center gap3" style="border:1px solid ${inState?'#0f172a':'#e2e8f0'};background:${inState?'#f8fafc':'#fff'};border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer"><input type="checkbox" style="accent-color:#0f172a" ${inState?'checked':''} onchange="builderToggle('expense','${x.id}')"><span class="grow"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px">${esc(x.description||x.category||'Expense')}</span><span style="display:block;font-size:11px;color:#94a3b8">${fmtDate(x.date)} · ${esc(x.category||'Other')}</span></span><span style="font-weight:600;font-size:14px">${fmtINR(x.amount)}</span></label>`;}).join('') || `<p style="font-size:14px;color:#94a3b8">No billable expenses available.</p>`}</div>` : `<div style="padding:24px;text-align:center;color:#94a3b8;font-size:14px">Select a matter first to see its unbilled time and expenses.</div>`}
+      </div></div>
+      <div class="card"><div class="cardhead">3 · Invoice lines</div><div class="cardbody">${itemsHtml}<div class="flex gap2" style="padding-top:8px"><input id="manualDesc" class="input" style="flex:1" placeholder="Manual line description"><input id="manualAmt" type="number" min="0" step="0.01" class="input" style="width:100px" placeholder="₹"><button class="btn btn-light" onclick="builderAddManual()">${icon('plus','sm')}</button></div></div></div>
+      <div class="card"><div class="cardhead">4 · Tax &amp; totals</div><div class="cardbody">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><input type="checkbox" id="invTaxToggle" style="accent-color:#0f172a;width:16px;height:16px" ${taxEnabled?'checked':''} onchange="toggleBuilderTax()"><label for="invTaxToggle" style="font-size:14px;font-weight:600">Apply ${esc(J.taxLabel)} to this invoice</label></div>
+        ${taxEnabled? (J.modes.length>1? `<div class="grid g2">${field(J.taxLabel+' rate', `<select id="invTaxRate" class="select" onchange="builderState.taxRate=+this.value;renderApp()">${rateOpts}</select>`)}${field('Type', `<select id="invTaxType" class="select" onchange="builderState.taxType=this.value;renderApp()">${modeOpts}</select>`)}</div>` : (J.modes[0]&&J.modes[0].id!=='none'? `<div class="grid g2">${field(J.taxLabel+' rate', `<select id="invTaxRate" class="select" onchange="builderState.taxRate=+this.value;renderApp()">${rateOpts}</select>`)}</div>` : `<p style="font-size:12px;color:#94a3b8">No tax is applied in this jurisdiction by default.</p>`)) : `<p style="font-size:12px;color:#94a3b8">Tax is disabled in Settings — this invoice will be issued without tax.</p>`}
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;margin-top:16px;font-size:14px">
+          <div class="flex between" style="margin-bottom:6px"><span style="color:#64748b">Subtotal</span><span style="font-weight:600">${fmtINR(M.subtotal)}</span></div>
+          ${taxEnabled && M.igst>0? `<div class="flex between" style="margin-bottom:6px"><span style="color:#64748b">IGST (${builderState.taxRate}%)</span><span style="font-weight:600">${fmtINR(M.igst)}</span></div>` : ''}
+          ${taxEnabled && M.cgst>0? `<div class="flex between" style="margin-bottom:6px"><span style="color:#64748b">CGST (${builderState.taxRate/2}%)</span><span style="font-weight:600">${fmtINR(M.cgst)}</span></div>` : ''}
+          ${taxEnabled && M.sgst>0? `<div class="flex between" style="margin-bottom:6px"><span style="color:#64748b">SGST (${builderState.taxRate/2}%)</span><span style="font-weight:600">${fmtINR(M.sgst)}</span></div>` : ''}
+          ${taxEnabled && M.vat>0? `<div class="flex between" style="margin-bottom:6px"><span style="color:#64748b">VAT (${builderState.taxRate}%)</span><span style="font-weight:600">${fmtINR(M.vat)}</span></div>` : ''}
+          ${taxEnabled && M.flatTax>0? `<div class="flex between" style="margin-bottom:6px"><span style="color:#64748b">${esc(J.taxLabel)} (${builderState.taxRate}%)</span><span style="font-weight:600">${fmtINR(M.flatTax)}</span></div>` : ''}
+          <div class="flex between" style="border-top:1px solid #e2e8f0;padding-top:8px;font-size:16px;font-weight:800"><span>Total</span><span>${fmtINR(M.total)}</span></div>
+        </div>
+        <p style="font-size:11px;color:#94a3b8;margin-top:12px">${J.code==='IN'?'India (GST): choose CGST+SGST for intra-state or IGST for inter-state; check whether the matter is GST-exempt.':J.code==='GB'?'UK (VAT): confirm the correct VAT rate for the services; your VAT registration number appears on the invoice.':J.code==='US'?'USA: legal services are generally not subject to sales tax in most states — only apply a rate if your jurisdiction requires it.':'Other: your custom tax label and rate apply as configured.'}</p>
+      </div></div>
+    </div>`;
+}
+function toggleBuilderTax(){
+  const on = $('#invTaxToggle').checked;
+  const J=juris();
+  builderState.taxRate = on ? J.defRate : 0;
+  builderState.taxType = on ? J.defMode : 'none';
+  renderApp();
+}
+function computeBuilderTotals(){
+  const subtotal = round2(builderState.items.reduce((s,it)=>s+it.amount,0));
+  const on = taxOn();
+  const taxAmt = on ? round2(subtotal * builderState.taxRate / 100) : 0;
+  let cgst=0,sgst=0,igst=0,vat=0,flatTax=0;
+  if(on){
+    if(builderState.taxType==='igst') igst=taxAmt;
+    else if(builderState.taxType==='cgst'){ cgst=round2(taxAmt/2); sgst=round2(taxAmt-cgst); }
+    else if(builderState.taxType==='vat') vat=taxAmt;
+    else if(builderState.taxType==='flat') flatTax=taxAmt;
+  }
+  return { subtotal, cgst, sgst, igst, vat, flatTax, total: round2(subtotal+taxAmt) };
+}
+function builderToggle(kind, refId){
+  const idx = builderState.items.findIndex(it=>it.refId===refId);
+  if(idx>=0){ builderState.items.splice(idx,1); }
+  else {
+    if(kind==='time'){
+      const t=db.timeEntries.find(x=>x.id===refId);
+      builderState.items.push({id:uid(), kind:'time', refId, desc:(t.description||'Time entry') + ` (${fmtDate(t.date)}, ${minsToHM(t.minutes)})`, amount: round2((t.minutes/60)*t.rateAtEntry)});
+    } else {
+      const x=db.expenses.find(e=>e.id===refId);
+      builderState.items.push({id:uid(), kind:'expense', refId, desc:(x.description||x.category||'Expense') + ` (${fmtDate(x.date)})`, amount: x.amount});
+    }
+  }
+  renderApp();
+}
+function builderAddAll(){
+  const mid=builderState.matterId; if(!mid) return;
+  db.timeEntries.filter(t=>t.matterId===mid && !t.invoiced && t.billable).forEach(t=>{
+    if(!builderState.items.some(it=>it.refId===t.id)) builderState.items.push({id:uid(), kind:'time', refId:t.id, desc:(t.description||'Time entry')+` (${fmtDate(t.date)}, ${minsToHM(t.minutes)})`, amount:round2((t.minutes/60)*t.rateAtEntry)});
+  });
+  db.expenses.filter(x=>x.matterId===mid && !x.invoiced && x.billable).forEach(x=>{
+    if(!builderState.items.some(it=>it.refId===x.id)) builderState.items.push({id:uid(), kind:'expense', refId:x.id, desc:(x.description||x.category||'Expense')+` (${fmtDate(x.date)})`, amount:x.amount});
+  });
+  renderApp();
+}
+function builderAddManual(){
+  const d=$('#manualDesc').value.trim(), a=round2(parseFloat($('#manualAmt').value)||0);
+  if(!d || a<=0){ toast('Enter a description and amount','warn'); return; }
+  builderState.items.push({id:uid(), kind:'manual', refId:null, desc:d, amount:a});
+  $('#manualDesc').value=''; $('#manualAmt').value='';
+  renderApp();
+}
+function builderRemoveItem(idx){ builderState.items.splice(idx,1); renderApp(); }
+function saveInvoice(issue){
+  if(!builderState.matterId){ toast('Select a matter','error'); return; }
+  if(!builderState.items.length){ toast('Add at least one line item','error'); return; }
+  const J=juris();
+  const m=matterById(builderState.matterId); if(!m) return;
+  const M = computeBuilderTotals();
+  const on = taxOn();
+  const num = issue ? `INV-${new Date().getFullYear()}-${String(db.seq.invoice).padStart(4,'0')}` : `DRF-${new Date().getFullYear()}-${String(db.seq.invoice).padStart(4,'0')}`;
+  const inv = { id:uid(), number:num, matterId:m.id, clientId:m.clientId, date:todayISO(), dueDate:addDaysISO(todayISO(), 15), items: builderState.items.map(it=>({id:it.id, kind:it.kind, refId:it.refId, desc:it.desc, amount:it.amount})), taxRate: on?builderState.taxRate:0, taxType: on?builderState.taxType:'none', taxEnabled:on, subtotal:M.subtotal, cgst:M.cgst, sgst:M.sgst, igst:M.igst, vat:M.vat, flatTax:M.flatTax, total:M.total, status: issue ? 'issued' : 'draft', payments:[], createdAt:nowISO(), stale:false };
+  db.invoices.push(inv);
+  if(issue){
+    builderState.items.forEach(it=>{
+      if(it.refId && it.kind==='time'){ const t=db.timeEntries.find(x=>x.id===it.refId); if(t){t.invoiced=true; t.invoiceId=inv.id;} }
+      if(it.refId && it.kind==='expense'){ const x=db.expenses.find(e=>e.id===it.refId); if(x){x.invoiced=true; x.invoiceId=inv.id;} }
+    });
+    db.seq.invoice++; toast('Invoice issued: '+num);
+  } else { toast('Draft saved: '+num); }
+  auditLogAdd('create','invoice',null,inv,'Invoice: '+num);
+  builderState={ matterId:'', items:[], taxRate:J.defRate, taxType:J.defMode };
+  recordIntegrity(); saveDB(); navTo('invoice', inv.id);
+}
+function voidInvoice(id){
+  const inv=db.invoices.find(i=>i.id===id); if(!inv) return;
+  if(!confirm(`Void invoice ${inv.number}? This will un-mark its items as billable.`)) return;
+  const before=clone(inv);
+  inv.status='void';
+  (inv.items||[]).forEach(it=>{
+    if(it.refId && it.kind==='time'){ const t=db.timeEntries.find(x=>x.id===it.refId); if(t){t.invoiced=false; t.invoiceId=null;} }
+    if(it.refId && it.kind==='expense'){ const x=db.expenses.find(e=>e.id===it.refId); if(x){x.invoiced=false; x.invoiceId=null;} }
+  });
+  auditLogAdd('update','invoice',before,inv,'Voided: '+inv.number);
+  recordIntegrity(); saveDB(); renderApp(); toast('Invoice voided','info');
+}
+function regenerateInvoice(id){
+  const inv=db.invoices.find(i=>i.id===id); if(!inv) return;
+  const before=clone(inv);
+  let changed=false;
+  (inv.items||[]).forEach(it=>{
+    if(it.refId && it.kind==='time'){
+      const t=db.timeEntries.find(x=>x.id===it.refId);
+      if(t){ const v=round2((t.minutes/60)*t.rateAtEntry); if(v!==it.amount){it.amount=v; changed=true;} it.desc=(t.description||'Time entry')+` (${fmtDate(t.date)}, ${minsToHM(t.minutes)})`; }
+    }
+    if(it.refId && it.kind==='expense'){
+      const x=db.expenses.find(e=>e.id===it.refId);
+      if(x){ if(x.amount!==it.amount){it.amount=x.amount; changed=true;} it.desc=(x.description||x.category||'Expense')+` (${fmtDate(x.date)})`; }
+    }
+  });
+  const mo = computeInvoiceTotals(inv);
+  inv.subtotal=mo.subtotal; inv.cgst=mo.cgst; inv.sgst=mo.sgst; inv.igst=mo.igst; inv.vat=mo.vat; inv.flatTax=mo.flatTax; inv.total=mo.total; inv.stale=false;
+  auditLogAdd('update','invoice',before,inv,'Regenerated: '+inv.number);
+  recordIntegrity(); saveDB(); renderApp(); toast(changed?'Invoice regenerated with updated amounts':'Items unchanged — totals refreshed');
+}
+function computeInvoiceTotals(inv){
+  const subtotal=round2((inv.items||[]).reduce((s,it)=>s+it.amount,0));
+  const on = inv.taxEnabled === true;
+  const taxAmt = on ? round2(subtotal*inv.taxRate/100) : 0;
+  let cgst=0,sgst=0,igst=0,vat=0,flatTax=0;
+  if(on){
+    if(inv.taxType==='igst') igst=taxAmt;
+    else if(inv.taxType==='cgst'){ cgst=round2(taxAmt/2); sgst=round2(taxAmt-cgst); }
+    else if(inv.taxType==='vat') vat=taxAmt;
+    else if(inv.taxType==='flat') flatTax=taxAmt;
+  }
+  return {subtotal, cgst, sgst, igst, vat, flatTax, total:round2(subtotal+taxAmt)};
+}
+
+function viewInvoice(id){
+  const inv=db.invoices.find(i=>i.id===id); if(!inv) return viewInvoices();
+  const J=juris();
+  const m=matterById(inv.matterId), c=m?clientById(m.clientId):null;
+  const paid=invoicePaid(inv), bal=invoiceBalance(inv);
+  const on = inv.taxEnabled === true;
+  let txLines='';
+  if(on && inv.taxType==='igst') txLines=`<div class="flex between"><span>IGST @ ${inv.taxRate}%</span><span>${fmtINR(inv.igst)}</span></div>`;
+  else if(on && inv.taxType==='cgst') txLines=`<div class="flex between"><span>CGST @ ${inv.taxRate/2}%</span><span>${fmtINR(inv.cgst)}</span></div><div class="flex between"><span>SGST @ ${inv.taxRate/2}%</span><span>${fmtINR(inv.sgst)}</span></div>`;
+  else if(on && inv.taxType==='vat') txLines=`<div class="flex between"><span>VAT @ ${inv.taxRate}%</span><span>${fmtINR(inv.vat)}</span></div>`;
+  else if(on && inv.taxType==='flat') txLines=`<div class="flex between"><span>${esc(J.taxLabel)} @ ${inv.taxRate}%</span><span>${fmtINR(inv.flatTax)}</span></div>`;
+  const itemRows = (inv.items||[]).map((it,idx)=>`<tr><td style="color:#94a3b8;width:32px">${idx+1}</td><td><div style="font-weight:500">${esc(it.desc)}</div><div style="font-size:11px;color:#94a3b8">${it.kind==='time'?'Professional services':it.kind==='expense'?'Disbursement / expense':'Other charges'}</div></td><td class="r" style="color:#64748b">1</td><td class="r" style="font-weight:600">${fmtINR(it.amount)}</td></tr>`).join('');
+  const taxBasis = !on ? 'No tax applied (disabled in settings)' : inv.taxType==='igst' ? 'IGST (inter-state) @ '+inv.taxRate+'%' : inv.taxType==='cgst' ? 'CGST + SGST (intra-state) @ '+inv.taxRate+'%' : inv.taxType==='vat' ? 'VAT @ '+inv.taxRate+'%' : inv.taxType==='flat' ? J.taxLabel+' @ '+inv.taxRate+'%' : 'No tax applied';
+  return `
+    ${pageTitle(esc(inv.number), btnGhost('All invoices','navTo(\'invoices\')','arrow-left') + (inv.status==='issued'&&bal>0?btnPrimary('Record payment',`openPaymentForm('${inv.id}')`,'banknote'):'') + (inv.status==='issued'&&bal>0?btnGreen('Mark fully paid',`markFullyPaid('${inv.id}')`,'check'):'') + `<button class="btn btn-light" onclick="window.print()">${icon('file-down','sm')} Print / PDF</button>` + btnGhost('Regenerate',`regenerateInvoice('${inv.id}')`,'refresh-cw'))}
+    ${inv.stale? `<div class="flex center gap3" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:16px;padding:12px 16px;font-size:14px;margin-bottom:20px">${icon('alert-triangle','sm')} <span>Time/expense entries linked to this invoice have changed. <button style="font-weight:700;text-decoration:underline;background:none;border:0" onclick="regenerateInvoice('${inv.id}')">Regenerate now</button>.</span></div>`:''}
+    <div class="card invoice" style="max-width:768px;margin:0 auto">
+      <div class="flex between" style="padding-bottom:24px;border-bottom:1px solid #e2e8f0"><div><h2>${esc(db.settings.firmName)}</h2><div class="muted" style="white-space:pre-line">${esc(db.settings.firmAddress)}</div><div class="small" style="margin-top:4px">${db.settings.firmGstin?`<div>${esc(J.taxNoLabel)}: ${esc(db.settings.firmGstin)}</div>`:''}${db.settings.firmEmail?`<div>${esc(db.settings.firmEmail)}</div>`:''}${db.settings.firmPhone?`<div>${esc(db.settings.firmPhone)}</div>`:''}</div></div><div style="text-align:right"><div style="display:inline-block;background:#0f172a;color:#fff;padding:8px 16px;border-radius:12px;font-weight:700;font-size:14px">${esc(inv.number)}</div><div class="small" style="margin-top:8px">${inv.status==='draft'?'DRAFT — not an official document':'Tax invoice'}</div></div></div>
+      <div class="grid g2" style="padding:24px 0"><div><div class="small" style="text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Billed to</div><div style="font-weight:700">${esc(c?c.name:'')}</div>${c&&c.gstin?`<div class="muted">${esc(J.taxNoLabel)}: ${esc(c.gstin)}</div>`:''}${c&&c.address?`<div class="muted" style="white-space:pre-line">${esc(c.address)}</div>`:''}<div class="muted" style="margin-top:4px">${esc(m?m.title:'')}</div></div><div style="text-align:right;font-size:14px"><div class="flex between" style="justify-content:flex-end;gap:24px"><span class="small">Invoice date</span><span style="font-weight:500">${fmtDate(inv.date)}</span></div><div class="flex between" style="justify-content:flex-end;gap:24px;margin-top:4px"><span class="small">Due date</span><span style="font-weight:500">${fmtDate(inv.dueDate)}</span></div><div class="flex between" style="justify-content:flex-end;gap:24px;margin-top:4px"><span class="small">Status</span><span style="font-weight:500">${inv.status==='void'?'Voided':bal<=0.005&&paid>0?'Paid':inv.status==='draft'?'Draft':'Issued'}</span></div></div></div>
+      <table class="tbl"><thead><tr><th>#</th><th>Description</th><th class="r">Qty</th><th class="r">Amount</th></tr></thead><tbody>${itemRows || `<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:16px">No line items</td></tr>`}</tbody></table>
+      <div style="display:flex;justify-content:flex-end;margin-top:24px"><div style="width:288px;font-size:14px"><div class="flex between"><span class="muted">Subtotal</span><span style="font-weight:600">${fmtINR(inv.subtotal)}</span></div>${txLines}<div class="flex between" style="border-top:1px solid #e2e8f0;padding-top:8px;font-size:16px;font-weight:800;margin-top:8px"><span>Total</span><span>${fmtINR(inv.total)}</span></div>${paid>0? `<div class="flex between" style="color:#047857;margin-top:4px"><span>Paid to date</span><span style="font-weight:700">− ${fmtINR(paid)}</span></div><div class="flex between" style="border-top:1px solid #e2e8f0;padding-top:8px;font-weight:800;color:${bal>0?'#dc2626':'#047857'}"><span>Balance due</span><span>${fmtINR(bal)}</span></div>`:''}</div></div>
+      <div style="font-size:14px;color:#64748b;border-top:1px solid #f1f5f9;margin-top:24px;padding-top:24px">Amount in words: <span style="font-weight:500">${esc(inrWords(inv.total))}</span></div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:8px">Terms: Payment is due within 15 days. Please quote the invoice number with payment.</div>
+      <div class="flex between" style="margin-top:40px;align-items:flex-end"><span class="small">This is a computer-generated invoice.</span><div style="text-align:center"><div style="width:160px;border-top:1px solid #cbd5e1;padding-top:8px;font-size:14px;color:#475569">Authorised signature</div></div></div>
+    </div>
+    <div class="grid g2 no-print" style="margin-top:24px;gap:24px">
+      <div class="card"><div class="cardhead">Payments received (${(inv.payments||[]).length})</div><div>${(inv.payments||[]).length? (inv.payments||[]).map(p=>`<div class="rowline"><div class="grow"><div style="font-weight:600">${fmtINR(p.amount)}</div><div style="font-size:11px;color:#94a3b8">${fmtDate(p.date)} · ${esc(p.method)} ${p.reference?'· '+esc(p.reference):''}</div></div><button class="btn btn-light" style="padding:4px 12px" onclick="navTo('receipt','${p.id}')">Receipt ${icon('arrow-up-right','sm')}</button></div>`).join('') : `<div class="empty">No payments recorded</div>`}</div></div>
+      <div class="card"><div class="cardhead">Invoice details</div><div class="cardbody" style="font-size:14px"><div class="flex between" style="margin-bottom:10px"><span class="muted">Tax basis</span><span style="font-weight:500">${esc(taxBasis)}</span></div><div class="flex between" style="margin-bottom:10px"><span class="muted">Issued</span><span style="font-weight:500">${fmtDate(inv.date)}</span></div><div class="flex between"><span class="muted">Due</span><span style="font-weight:500">${fmtDate(inv.dueDate)}</span></div>${inv.status==='issued'&&bal>0? `<button class="btn btn-green" style="width:100%;margin-top:12px;justify-content:center" onclick="openPaymentForm('${inv.id}')">${icon('banknote','sm')} Record payment</button>`:''}</div></div>
+    </div>`;
+}
+
+function openPaymentForm(invoiceId){
+  const inv=db.invoices.find(i=>i.id===invoiceId); if(!inv) return;
+  const c=clientById(inv.clientId);
+  const bal=invoiceBalance(inv);
+  const useCM = clientMoneyOn();
+  const cmAvail = useCM ? clientFundsAvailable(inv.clientId) : 0;
+  modal(` ${modalHeader('Record payment', `${esc(inv.number)} · ${esc(c?c.name:'')} · balance ${fmtINR(bal)}`)}
+    <div class="modalbody">
+      ${field('Amount *', `<input id="pmAmt" type="number" min="0" step="0.01" class="input" style="font-size:18px;font-weight:700" value="${bal}">`)}
+      <div class="grid g2">
+        ${field('Date', `<input id="pmDate" type="date" class="input" value="${todayISO()}">`)}
+        ${field('Method', `<select id="pmMethod" class="select"><option>UPI</option><option>NEFT</option><option>IMPS</option><option>RTGS</option><option>Cheque</option><option>Cash</option><option>Card</option><option>Wire transfer</option>${useCM?`<option value="CM">Client money</option>`:''}</select>`)}
+      </div>
+      ${useCM? `<div style="background:#f8fafc;border-radius:12px;padding:12px;font-size:12px;color:#475569;margin-bottom:16px">Client funds available for this client: <b>${fmtINR(cmAvail)}</b>. Paying from client money debits the client ledger, credits fees earned, and moves cash from client bank to office bank.</div>`:''}
+      ${field('Reference (UTR / cheque no.)', `<input id="pmRef" class="input" placeholder="Optional">`)}
+      ${field('Note', `<input id="pmNote" class="input" placeholder="Optional">`)}
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-green" onclick="savePayment('${inv.id}')">${icon('check','sm')} Record payment</button>`)}`);
+}
+function savePayment(invoiceId){
+  const inv=db.invoices.find(i=>i.id===invoiceId); if(!inv) return;
+  const amt=round2(parseFloat($('#pmAmt').value)||0);
+  if(amt<=0){ toast('Enter a valid amount','error'); return; }
+  const bal=invoiceBalance(inv);
+  if(amt>bal+0.005){ toast(`Amount exceeds balance (${fmtINR(bal)})`,'error'); return; }
+  const method=$('#pmMethod').value;
+  if(method==='CM'){
+    if(!transferToOffice(inv.clientId, inv.matterId, amt, 'Payment '+inv.number, $('#pmDate').value||todayISO())) return;
+  }
+  const receiptNo = `RCT-${new Date().getFullYear()}-${String(db.seq.receipt).padStart(4,'0')}`;
+  const before=clone(inv);
+  inv.payments = inv.payments||[];
+  inv.payments.push({id:uid(), date:$('#pmDate').value, amount:amt, method: method==='CM'?'Client money':method, reference:$('#pmRef').value.trim(), note:$('#pmNote').value.trim(), receiptNo, createdAt:nowISO()});
+  db.seq.receipt++;
+  if(invoiceBalance(inv)<=0.005) inv.status='issued';
+  auditLogAdd('update','invoice',before,inv,'Payment '+receiptNo);
+  recordIntegrity(); saveDB(); closeModal(); renderApp(); toast('Payment recorded — receipt '+receiptNo);
+}
+function markFullyPaid(invoiceId){
+  const inv=db.invoices.find(i=>i.id===invoiceId); if(!inv) return;
+  const bal=invoiceBalance(inv);
+  if(bal<=0.005) return;
+  if(!confirm(`Mark ${inv.number} as fully paid (${fmtINR(bal)})?`)) return;
+  const receiptNo=`RCT-${new Date().getFullYear()}-${String(db.seq.receipt).padStart(4,'0')}`;
+  const before=clone(inv);
+  inv.payments=inv.payments||[]; inv.payments.push({id:uid(), date:todayISO(), amount:bal, method:'Bank transfer', reference:'Adjusted', note:'Marked fully paid', receiptNo, createdAt:nowISO()});
+  db.seq.receipt++;
+  auditLogAdd('update','invoice',before,inv,'Marked paid: '+inv.number);
+  recordIntegrity(); saveDB(); renderApp(); toast('Invoice marked paid');
+}
+function viewReceipts(){
+  const receipts = db.invoices.flatMap(inv=>(inv.payments||[]).map(p=>({...p, invoice:inv})));
+  receipts.sort((a,b)=>b.date.localeCompare(a.date));
+  return `
+    ${pageTitle('Payment Receipts', '')}
+    <div class="card" style="overflow:hidden">
+      ${receipts.length? `<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Receipt</th><th>Date</th><th>Received from</th><th>Invoice</th><th>Method</th><th class="r">Amount</th><th class="r">View</th></tr></thead><tbody>${receipts.map(p=>{
+        const c=clientById(p.invoice.clientId);
+        return `<tr><td style="font-weight:700">${esc(p.receiptNo)}</td><td style="color:#64748b;white-space:nowrap">${fmtDate(p.date)}</td><td style="font-weight:500">${esc(c?c.name:'')}</td><td style="color:#64748b">${esc(p.invoice.number)}</td><td style="color:#64748b">${esc(p.method)} ${p.reference?`<span style="color:#94a3b8">· ${esc(p.reference)}</span>`:''}</td><td class="r" style="font-weight:700;color:#047857">${fmtINR(p.amount)}</td><td class="r"><button class="iconbtn" onclick="navTo('receipt','${p.id}')">${icon('eye','sm')}</button></td></tr>`;}).join('')}</tbody></table></div>` : emptyState('credit-card','No receipts yet','Receipts are generated when you record a payment')}
+    </div>`;
+}
+function viewReceipt(pid){
+  let found=null;
+  for(const inv of db.invoices){ const p=(inv.payments||[]).find(x=>x.id===pid); if(p){ found={p, inv}; break; } }
+  if(!found) return viewReceipts();
+  const {p, inv}=found; const c=clientById(inv.clientId);
+  const paidBefore = round2((inv.payments||[]).filter(x=>x.date<p.date || (x.date===p.date && x.createdAt<p.createdAt)).reduce((s,x)=>s+x.amount,0));
+  const balanceAfter = round2(inv.total - paidBefore - p.amount);
+  return `
+    ${pageTitle(esc(p.receiptNo), btnGhost('All receipts','navTo(\'receipts\')','arrow-left') + `<button class="btn btn-light" onclick="window.print()">${icon('file-down','sm')} Print / PDF</button>`)}
+    <div class="card invoice" style="max-width:672px;margin:0 auto">
+      <div class="flex between" style="padding-bottom:24px;border-bottom:1px solid #e2e8f0"><div><h2>${esc(db.settings.firmName)}</h2><div class="muted">${esc(db.settings.firmAddress)}</div>${db.settings.firmGstin?`<div class="small" style="margin-top:4px">${esc(juris().taxNoLabel)}: ${esc(db.settings.firmGstin)}</div>`:''}</div><div style="text-align:right"><div style="display:inline-block;background:#059669;color:#fff;padding:8px 16px;border-radius:12px;font-weight:700;font-size:14px">${esc(p.receiptNo)}</div><div class="small" style="margin-top:8px">Payment receipt · ${fmtDate(p.date)}</div></div></div>
+      <div style="padding:24px 0;text-align:center;border-bottom:1px solid #f1f5f9"><div class="small" style="text-transform:uppercase;letter-spacing:.1em">Received with thanks from</div><div style="font-size:18px;font-weight:700;margin-top:4px">${esc(c?c.name:'')}</div><div style="font-size:30px;font-weight:800;color:#047857;margin-top:16px">${fmtINR(p.amount)}</div><div style="font-size:14px;color:#64748b;margin-top:8px">${esc(inrWords(p.amount))}</div></div>
+      <div style="padding:20px 0;font-size:14px"><div class="flex between" style="margin-bottom:8px"><span class="muted">Towards invoice</span><span style="font-weight:600">${esc(inv.number)} · ${fmtDate(inv.date)}</span></div><div class="flex between" style="margin-bottom:8px"><span class="muted">For</span><span style="font-weight:600">${esc(matterById(inv.matterId)?matterById(inv.matterId).title:'')}</span></div><div class="flex between" style="margin-bottom:8px"><span class="muted">Payment method</span><span style="font-weight:600">${esc(p.method)} ${p.reference?'· '+esc(p.reference):''}</span></div><div class="flex between" style="border-top:1px solid #f1f5f9;padding-top:8px"><span class="muted">Balance remaining on invoice</span><span style="font-weight:800;color:${balanceAfter>0?'#dc2626':'#047857'}">${fmtINR(balanceAfter)}</span></div></div>
+      <div class="flex between" style="margin-top:32px;align-items:flex-end"><span class="small">This is a computer-generated receipt.</span><div style="text-align:center"><div style="width:160px;border-top:1px solid #cbd5e1;padding-top:8px;font-size:14px;color:#475569">For ${esc(db.settings.firmName)}</div></div></div>
+    </div>`;
+}
+
+function viewReports(){
+  const solMap = new Map();
+  db.timeEntries.forEach(t=>{
+    const k = t.solicitor || `(${solLabel()})`;
+    if(!solMap.has(k)) solMap.set(k,{name:k, minutes:0, entries:0, billableMin:0, billedValue:0, unbilledValue:0, monthMin:0});
+    const s=solMap.get(k);
+    s.minutes+=t.minutes; s.entries++;
+    if(t.billable){ s.billableMin+=t.minutes; const v=(t.minutes/60)*t.rateAtEntry; if(t.invoiced) s.billedValue+=v; else s.unbilledValue+=v; }
+    if(t.date.slice(0,7)===todayISO().slice(0,7)) s.monthMin+=t.minutes;
+  });
+  const sols=[...solMap.values()].sort((a,b)=>b.minutes-a.minutes);
+  const maxMin = Math.max(1, ...sols.map(s=>s.minutes));
+  const clientRev = new Map();
+  db.invoices.filter(i=>i.status!=='void').forEach(inv=>{
+    const k=inv.clientId; if(!clientRev.has(k)) clientRev.set(k,{name:clientById(k)?clientById(k).name:'?', invoiced:0, collected:0, outstanding:0});
+    const r=clientRev.get(k); r.invoiced+=inv.total; r.collected+=invoicePaid(inv); r.outstanding+=invoiceBalance(inv);
+  });
+  const clients=[...clientRev.values()].sort((a,b)=>b.outstanding-a.outstanding);
+  const maxRev = Math.max(1, ...clients.map(c=>c.outstanding));
+  const today=todayISO(); const buckets={c30:0,c60:0,c90:0,c90p:0};
+  db.invoices.filter(i=>i.status==='issued'&&invoiceBalance(i)>0).forEach(inv=>{
+    const days = Math.floor((new Date(today)-new Date(inv.dueDate+'T12:00:00'))/86400000);
+    if(days<=0) return; else if(days<=30) buckets.c30+=invoiceBalance(inv); else if(days<=60) buckets.c60+=invoiceBalance(inv); else if(days<=90) buckets.c90+=invoiceBalance(inv); else buckets.c90p+=invoiceBalance(inv);
+  });
+  const totalBillableHours = db.timeEntries.filter(t=>t.billable).reduce((s,t)=>s+t.minutes,0)/60;
+  const totalHours = db.timeEntries.reduce((s,t)=>s+t.minutes,0)/60;
+  const unbTotal = round2(db.matters.reduce((s,m)=>s+matterUnbilledValue(m.id),0));
+  const cmClients = clientMoneyOn()? db.clients.filter(c=>clientFundsAvailable(c.id)>0).map(c=>({c, b:clientFundsAvailable(c.id)})) : [];
+  return `
+    ${pageTitle('Reports', btnGhost('Export CSV','exportReportsCSV()','file-down'))}
+    <div class="grid g4 mb4">
+      ${statCard('Total hours logged', totalHours.toFixed(1)+' h', `${db.timeEntries.length} entries`, 'clock')}
+      ${statCard('Billable hours', totalBillableHours.toFixed(1)+' h', `${(totalHours? Math.round(100*totalBillableHours/totalHours):0)}% of logged`, 'timer')}
+      ${statCard('Invoiced (net)', fmtINR(round2(db.invoices.filter(i=>i.status!=='void').reduce((s,i)=>s+i.subtotal,0))), `${db.invoices.filter(i=>i.status!=='void').length} invoices`, 'file-text')}
+      ${statCard('Unbilled value', fmtINR(unbTotal), 'ready to invoice', 'clock')}
+    </div>
+    ${clientMoneyOn()? `<div class="card mb4"><div class="cardhead"><span>Client money balances (3-way, per client)</span></div><div class="cardbody"><div class="grid g4">${statCard('Client bank balance', fmtINR(bal('bank','Client Bank')), 'segregated', 'banknote')}${statCard('Client ledger (owed to clients)', fmtINR(Math.max(0,-bal('client','Client Ledger'))), 'liability', 'wallet')}${statCard('Office bank balance', fmtINR(bal('bank','Office Bank')), 'firm money', 'landmark')}${statCard('Client funds held', fmtINR(round2(db.clients.reduce((s,c)=>s+clientFundsAvailable(c.id),0))), 'across clients', 'scale')}</div>${cmClients.length? `<div style="margin-top:16px;border-top:1px solid #f1f5f9;padding-top:12px">${cmClients.map(({c,b})=>`<div class="flex between" style="padding:6px 0;font-size:14px"><span>${esc(c.name)}</span><span style="font-weight:600">${fmtINR(b)}</span></div>`).join('')}</div>`:''}</div></div>`:''}
+    <div class="grid g2 mb4">
+      <div class="card"><div class="cardhead">${esc(solLabel())} productivity</div><div class="cardbody">${sols.length? sols.map(s=>{ const pct=Math.round(100*s.minutes/maxMin); return `<div style="margin-bottom:16px"><div class="flex between" style="font-size:14px;margin-bottom:6px"><span style="font-weight:600">${esc(s.name)}</span><span style="color:#94a3b8;font-size:12px">${s.entries} entries · ${minsToHM(s.minutes)} · ${minsToHM(s.monthMin)} this month</span></div><div class="bar"><div style="width:${pct}%"></div></div><div class="flex between" style="font-size:11px;color:#94a3b8;margin-top:4px"><span>Billable: ${minsToHM(s.billableMin)}</span><span>Billed: ${fmtINR(s.billedValue)}</span><span>Unbilled: ${fmtINR(s.unbilledValue)}</span></div></div>`;}).join('') : emptyState('users','No time logged yet','Entries will appear here by '+solLabel().toLowerCase())}</div></div>
+      <div class="card"><div class="cardhead">Outstanding receivables — aging</div><div class="cardbody">${[['Not yet due', round2(db.invoices.filter(i=>i.status==='issued'&&invoiceBalance(i)>0&&(!i.dueDate||i.dueDate>=today)).reduce((s,i)=>s+invoiceBalance(i),0)),'#f1f5f9','#334155'],['1–30 days overdue', buckets.c30,'#fef3c7','#b45309'],['31–60 days', buckets.c60,'#ffedd5','#c2410c'],['61–90 days', buckets.c90,'#fee2e2','#dc2626'],['90+ days', buckets.c90p,'#dc2626','#fff']].map(([label,amt,bg,fg])=>`<div style="display:flex;align-items:center;justify-content:space-between;background:${bg};color:${fg};border-radius:12px;padding:12px 16px;margin-bottom:8px"><span style="font-weight:600;font-size:14px">${label}</span><span style="font-weight:800">${fmtINR(amt)}</span></div>`).join('')}</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card"><div class="cardhead">Outstanding by client</div><div class="cardbody">${clients.length? clients.map(c=>{ const pct=Math.round(100*c.outstanding/maxRev); return `<div style="margin-bottom:16px"><div class="flex between" style="font-size:14px;margin-bottom:6px"><span style="font-weight:600">${esc(c.name)}</span><span style="font-weight:800;color:${c.outstanding>0?'#dc2626':'#94a3b8'}">${fmtINR(c.outstanding)}</span></div><div class="bar ${c.outstanding>0?'red':'em'}"><div style="width:${pct}%"></div></div><div class="flex between" style="font-size:11px;color:#94a3b8;margin-top:4px"><span>Invoiced: ${fmtINR(c.invoiced)}</span><span>Collected: ${fmtINR(c.collected)}</span></div></div>`;}).join('') : emptyState('users','No invoice activity','Data appears once you issue invoices')}</div></div>
+      <div class="card"><div class="cardhead">Data integrity</div><div class="cardbody" style="font-size:14px"><div class="flex center gap3" style="background:#ecfdf5;color:#047857;border-radius:12px;padding:16px">${icon('shield-check','sm')}<div><div style="font-weight:700">All data is stored locally</div><div style="font-size:12px;opacity:.8">E2E within this browser — nothing is sent to any server.</div></div></div><div class="flex between" style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px"><span class="muted">Audit log entries</span><span style="font-weight:700">${(db.auditLog||[]).length}</span></div><div class="flex between" style="margin-top:8px"><span class="muted">Ledger entries</span><span style="font-weight:700">${led().length}</span></div></div></div>
+    </div>`;
+}
+function exportReportsCSV(){
+  const lines=[];
+  lines.push(solLabel().toUpperCase()+' PRODUCTIVITY'); lines.push(`${solLabel()},Entries,Minutes,Hours,Billable minutes,Billed value,Unbilled value,This month minutes`);
+  const solMap=new Map();
+  db.timeEntries.forEach(t=>{ const k=t.solicitor||'('+solLabel()+')'; if(!solMap.has(k))solMap.set(k,{entries:0,min:0,bmin:0,bv:0,uv:0,mo:0}); const s=solMap.get(k); s.entries++; s.min+=t.minutes; if(t.billable){s.bmin+=t.minutes; const v=(t.minutes/60)*t.rateAtEntry; if(t.invoiced)s.bv+=v;else s.uv+=v;} if(t.date.slice(0,7)===todayISO().slice(0,7))s.mo+=t.minutes; });
+  solMap.forEach((s,k)=>lines.push([k,s.entries,s.min,(s.min/60).toFixed(2),s.bmin,s.bv.toFixed(2),s.uv.toFixed(2),s.mo].join(',')));
+  lines.push(''); lines.push('OUTSTANDING BY CLIENT'); lines.push('Client,Invoiced,Collected,Outstanding');
+  const cm=new Map();
+  db.invoices.filter(i=>i.status!=='void').forEach(inv=>{ const k=inv.clientId; if(!cm.has(k))cm.set(k,{iv:0,col:0,out:0}); const r=cm.get(k); r.iv+=inv.total; r.col+=invoicePaid(inv); r.out+=invoiceBalance(inv); });
+  cm.forEach((r,k)=>lines.push([clientById(k)?clientById(k).name:'?', r.iv.toFixed(2), r.col.toFixed(2), r.out.toFixed(2)].join(',')));
+  if(clientMoneyOn()){
+    lines.push(''); lines.push('CLIENT MONEY'); lines.push('Client,Available funds,Client bank balance');
+    db.clients.forEach(c=>{ const b=clientFundsAvailable(c.id); if(b>0) lines.push([c.name, b.toFixed(2), clientBankBalance(c.id).toFixed(2)].join(',')); });
+  }
+  downloadFile('lex-reports-'+todayISO()+'.csv', String.fromCharCode(0xFEFF)+lines.join(String.fromCharCode(10)));
+}
+
+function viewBackup(){
+  const itg = checkIntegrity();
+  const schemaErrors = validateSchema();
+  const auditV = verifyAuditLog();
+  const auditVis = (db.auditLog||[]).slice(-60).reverse();
+  const lastBk = meta.lastBackupAt;
+  const lastChk = meta.lastIntegrityAt;
+  const aged = lastBk ? Math.floor((Date.now()-new Date(lastBk))/86400000) : null;
+  return `
+    ${pageTitle('Backup & Integrity', '')}
+    <div class="grid g2">
+      <div>
+        <div class="card mb4"><div class="cardhead"><div><div>Workspace file (concurrent, offline)</div><div style="font-size:12px;color:#94a3b8;font-weight:400">Flat JSON file shared across computers — auto-updated on every save. Conflict resolution on push.</div></div></div><div class="cardbody">
+          <div class="flex wrap gap2">
+            <button class="btn btn-dark" onclick="createWorkspaceFile()">${icon('file-plus-2','sm')} Create workspace file</button>
+            <button class="btn btn-light" onclick="openWorkspaceFile()">${icon('upload','sm')} Open workspace file</button>
+            ${WS.mode==='file'? `<button class="btn btn-light" onclick="pushWorkspace().then(()=>toast('Workspace pushed'))">${icon('refresh-cw','sm')} Push now (rev ${WS.rev})</button>` : ''}
+          </div>
+          <div style="background:#f8fafc;border-radius:12px;padding:12px;font-size:12px;color:#64748b;margin-top:12px;line-height:1.5">
+            <div><b>Status:</b> ${WS.mode==='file' ? 'Connected to '+esc(WS.name||'workspace') + ' · rev '+WS.rev : 'No workspace file open.'}</div>
+            <div style="margin-top:6px">How it works: open/create a .json file. Every change auto-saves to the file (File System Access API). If another user has already written a newer revision, you'll be asked to keep yours, load theirs, or merge. No internet required.</div>
+          </div>
+        </div></div>
+        <div class="card mb4"><div class="cardhead"><div><div>Encrypted backup</div><div style="font-size:12px;color:#94a3b8;font-weight:400">Exports all data as an AES-256-GCM encrypted JSON file.</div></div></div><div class="cardbody">
+          ${field('Backup password *', `<input id="bkPass" type="password" class="input" placeholder="At least 8 characters" autocomplete="new-password">`)}
+          ${field('Confirm password', `<input id="bkPass2" type="password" class="input" placeholder="Repeat password">`)}
+          <div class="flex wrap gap2"><button class="btn btn-dark" onclick="exportBackup()">${icon('file-down','sm')} Export encrypted backup</button><label class="btn btn-light" style="cursor:pointer">${icon('upload','sm')} Restore from backup<input type="file" accept=".json,application/json" style="display:none" onchange="importBackupFile(this.files[0])"></label></div>
+          <div style="background:#f8fafc;border-radius:12px;padding:16px;font-size:12px;color:#64748b;margin-top:16px"><div class="flex between"><span>Last backup</span><span style="font-weight:600">${lastBk?fmtDate(lastBk)+(aged>0?` (${aged}d ago)`:' (today)'):'Never'}</span></div>${aged!==null && aged>7? `<div style="color:#b45309;font-weight:600;margin-top:8px">${icon('alert-triangle','sm')} You haven't backed up in over a week.</div>`:''}<div style="margin-top:8px">Encrypted backups include all data, audit log, and ledger.</div></div>
+        </div></div>
+        <div class="card"><div class="cardhead">Data volume</div><div class="cardbody grid g3">${[['Clients',db.clients.length],['Matters',db.matters.length],['Time entries',db.timeEntries.length],['Expenses',db.expenses.length],['Invoices',db.invoices.length],['Ledger',led().length]].map(([l,n])=>`<div style="background:#f8fafc;border-radius:12px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:800">${n}</div><div style="font-size:11px;color:#94a3b8;text-transform:uppercase">${l}</div></div>`).join('')}</div></div>
+      </div>
+      <div>
+        <div class="card mb4"><div class="cardhead"><div><div>Automatic data integrity</div><div style="font-size:12px;color:#94a3b8;font-weight:400">Checksum + schema validation on every save, at unlock, and daily.</div></div><button class="btn btn-light" onclick="runManualIntegrity()">${icon('refresh-cw','sm')} Run now</button></div><div class="cardbody">
+          <div class="flex center gap3" style="background:${itg.ok?'#ecfdf5':'#fef2f2'};color:${itg.ok?'#047857':'#b91c1c'};border-radius:12px;padding:16px">${icon(itg.ok?'shield-check':'alert-triangle','sm')}<div><div style="font-weight:700">${itg.ok?'Data intact':'Integrity check FAILED'}</div><div style="font-size:12px;opacity:.85">${itg.ok? `Rolling checksum verified · ${itg.digest.rec} records · ${itg.digest.hash}` : 'The stored data does not match its checksum. Restore from a backup if this persists.'}</div></div></div>
+          <div class="flex between" style="font-size:12px;color:#94a3b8;margin-top:12px"><span>Last automatic check</span><span style="font-weight:600">${lastChk?fmtDate(lastChk)+' '+new Date(lastChk).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):'—'}</span></div>
+          <div style="border-top:1px solid #f1f5f9;padding-top:12px;margin-top:12px"><div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">Schema validation — ${schemaErrors.length? schemaErrors.length+' issue(s)':'all records valid'}</div>${schemaErrors.length? `<div>${schemaErrors.slice(0,40).map(e=>`<div style="font-size:12px;color:#b91c1c;margin-bottom:4px">${icon('x-circle','sm')} ${esc(e)}</div>`).join('')}</div>` : `<div style="font-size:12px;color:#047857">${icon('check-circle-2','sm')} No schema or reference violations found.</div>`}</div>
+        </div></div>
+        <div class="card"><div class="cardhead"><div><div>Immutable audit log</div><div style="font-size:12px;color:#94a3b8;font-weight:400">Every add / edit / delete keeps before &amp; after snapshots in a hash-chained log.</div></div></div><div class="cardbody">
+          <div class="flex center gap3" style="background:${auditV.ok?'#ecfdf5':'#fef2f2'};color:${auditV.ok?'#047857':'#b91c1c'};border-radius:12px;padding:16px">${icon(auditV.ok?'shield-check':'alert-triangle','sm')}<div><div style="font-weight:700">${auditV.ok?'Chain verified':'Chain BROKEN'}</div><div style="font-size:12px;opacity:.85">${auditV.ok? `${auditV.count} entries · each links to the previous hash` : `Break at entry #${auditV.at}: ${auditV.why}`}</div></div></div>
+          <div style="max-height:384px;overflow-y:auto;margin-top:8px">${auditVis.length? auditVis.map(e=>`<details class="summaryrow"><summary><span><span style="font-weight:600;font-size:14px">${esc(e.action)} ${esc(e.entity)}</span><span style="display:block;font-size:12px;color:#94a3b8">${esc(e.label||'')} · ${fmtDate(e.ts)}</span></span><span class="chip ${e.action==='delete'?'chip-red':e.action==='create'?'chip-green':'chip-blue'}">${e.action}</span></summary><div style="margin-left:8px;font-size:12px">${e.before!=null? `<div style="background:#f8fafc;border-radius:8px;padding:8px;margin-bottom:8px"><div style="font-weight:700;color:#64748b;text-transform:uppercase;font-size:10px;margin-bottom:4px">Before</div><pre class="dump">${esc(JSON.stringify(e.before,null,1))}</pre></div>`:''}${e.after!=null? `<div style="background:#f8fafc;border-radius:8px;padding:8px;margin-bottom:8px"><div style="font-weight:700;color:#64748b;text-transform:uppercase;font-size:10px;margin-bottom:4px">After</div><pre class="dump">${esc(JSON.stringify(e.after,null,1))}</pre></div>`:''}<div style="color:#94a3b8">seq ${e.seq} · prev ${esc(String(e.prevHash).slice(0,12))}… · ${esc(String(e.hash).slice(0,12))}…</div></div></details>`).join('') : `<div class="empty">No entries yet — changes you make will appear here.</div>`}</div>
+        </div></div>
+      </div>
+    </div>`;
+}
+const b64FromBuf = buf => { let s=''; new Uint8Array(buf).forEach(b=>s+=String.fromCharCode(b)); return btoa(s); };
+const bufFromB64 = s => { const bin=atob(s); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i); return u.buffer; };
+const cryptoAvailable = () => typeof crypto!=='undefined' && crypto.subtle && crypto.subtle.encrypt;
+async function deriveKeyPBKDF2(password, salt){
+  const enc=new TextEncoder();
+  const base=await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:120000, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function encryptBackup(jsonStr, password){
+  if(cryptoAvailable()){
+    const salt=crypto.getRandomValues(new Uint8Array(16));
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const key=await deriveKeyPBKDF2(password, salt);
+    const ct=await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(jsonStr));
+    return {v:1, alg:'AES-GCM/PBKDF2', salt:b64FromBuf(salt), iv:b64FromBuf(iv), data:b64FromBuf(ct), createdAt:nowISO()};
+  }
+  function stretch(pwd, saltArr, len){ let state=0x9E3779B9, out=new Uint8Array(len), pos=0; const mix=()=>{ for(let i=0;i<pwd.length;i++){ state=Math.imul(state ^ pwd.charCodeAt(i), 2654435761); state^=state>>>13; } for(let i=0;i<saltArr.length;i++){ state=Math.imul(state ^ saltArr[i], 1597334677); state^=state>>>7; } return state>>>0; }; while(pos<len){ const v=mix(); out[pos++]=v&0xff; out[pos++]=v>>>8&0xff; } return out; }
+  function rc4(key, data){ const S=Array.from({length:256},(_,i)=>i); let j=0; for(let i=0;i<256;i++){ j=(j+S[i]+key[i%key.length])&255; [S[i],S[j]]=[S[j],S[i]]; } let i=0; j=0; const out=new Uint8Array(data.length); for(let n=0;n<data.length;n++){ i=(i+1)&255; j=(j+S[i])&255; [S[i],S[j]]=[S[j],S[i]]; out[n]=data[n]^S[(S[i]+S[j])&255]; } return out; }
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const key=stretch(password, salt, 64);
+  const data=new TextEncoder().encode(jsonStr);
+  const ct=rc4(key, data);
+  return {v:1, alg:'RC4-PBKDF2-v1', salt:b64FromBuf(salt), data:b64FromBuf(ct), createdAt:nowISO()};
+}
+async function decryptBackup(obj, password){
+  if(!obj || !obj.alg) throw new Error('Not a LexTime backup file');
+  if(obj.alg==='AES-GCM/PBKDF2'){
+    if(!cryptoAvailable()) throw new Error('Strong crypto unavailable in this browser context — open via localhost/HTTPS to restore AES backups');
+    const salt=new Uint8Array(bufFromB64(obj.salt));
+    const iv=new Uint8Array(bufFromB64(obj.iv));
+    const key=await deriveKeyPBKDF2(password, salt);
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, bufFromB64(obj.data));
+    return new TextDecoder().decode(pt);
+  }
+  if(obj.alg==='RC4-PBKDF2-v1'){
+    function stretch(pwd, saltArr, len){ let state=0x9E3779B9, out=new Uint8Array(len), pos=0; const mix=()=>{ for(let i=0;i<pwd.length;i++){ state=Math.imul(state ^ pwd.charCodeAt(i), 2654435761); state^=state>>>13; } for(let i=0;i<saltArr.length;i++){ state=Math.imul(state ^ saltArr[i], 1597334677); state^=state>>>7; } return state>>>0; }; while(pos<len){ const v=mix(); out[pos++]=v&0xff; out[pos++]=v>>>8&0xff; } return out; }
+    function rc4(key, data){ const S=Array.from({length:256},(_,i)=>i); let j=0; for(let i=0;i<256;i++){ j=(j+S[i]+key[i%key.length])&255; [S[i],S[j]]=[S[j],S[i]]; } let i=0; j=0; const out=new Uint8Array(data.length); for(let n=0;n<data.length;n++){ i=(i+1)&255; j=(j+S[i])&255; [S[i],S[j]]=[S[j],S[i]]; out[n]=data[n]^S[(S[i]+S[j])&255]; } return out; }
+    const salt=new Uint8Array(bufFromB64(obj.salt));
+    const key=stretch(password, salt, 64);
+    const ct=new Uint8Array(bufFromB64(obj.data));
+    return new TextDecoder().decode(rc4(key, ct));
+  }
+  throw new Error('Unknown backup format: '+obj.alg);
+}
+async function exportBackup(){
+  const p=$('#bkPass').value, p2=$('#bkPass2').value;
+  if(p.length<8){ toast('Password must be at least 8 characters','error'); return; }
+  if(p!==p2){ toast('Passwords do not match','error'); return; }
+  const payload = JSON.stringify({app:'LexTime', version:2, exportedAt:nowISO(), data:db}, null, 2);
+  try{
+    const box = await encryptBackup(payload, p);
+    downloadFile('lexbackup-'+todayISO()+'.json', JSON.stringify(box, null, 2));
+    meta.lastBackupAt = nowISO(); saveMeta(); toast('Encrypted backup downloaded');
+  }catch(e){ toast('Backup failed: '+(e&&e.message?e.message:e),'error'); }
+}
+async function importBackupFile(file){
+  if(!file) return;
+  modal(` ${modalHeader('Restore from backup')}
+    <div class="modalbody"><p style="font-size:14px;color:#64748b">File: <span style="font-weight:600;color:#0f172a">${esc(file.name)}</span></p>
+      ${field('Backup password', `<input id="rsPass" type="password" class="input" placeholder="Password used when exporting" autocomplete="off">`)}
+      <div style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:12px;padding:12px;font-size:12px;display:flex;gap:8px">${icon('alert-triangle','sm')} <span>Restoring <b>replaces all current data</b>. The current data will be lost unless you export a backup first.</span></div>
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="doRestore()">Replace data</button>`)}`);
+  window._restoreFile = file;
+}
+async function doRestore(){
+  const file = window._restoreFile; if(!file) return;
+  const p=$('#rsPass').value;
+  const oldSum = db? {clients:db.clients.length,matters:db.matters.length,entries:db.timeEntries.length,invoices:db.invoices.length} : null;
+  try{
+    const text = await file.text();
+    const box = JSON.parse(text);
+    const jsonStr = await decryptBackup(box, p);
+    const parsed = JSON.parse(jsonStr);
+    const raw = parsed.data || parsed;
+    if(!raw || !raw.settings || !Array.isArray(raw.clients)) throw new Error('Invalid LexTime backup structure');
+    const oldDb = db;
+    const data = normalizeParsed(raw);
+    db = data;
+    const errs = validateSchema();
+    if(errs.length){ db=oldDb; throw new Error('Backup failed validation: '+errs.slice(0,3).join('; ')); }
+    const newSum={clients:db.clients.length,matters:db.matters.length,entries:db.timeEntries.length,invoices:db.invoices.length};
+    auditLogAdd('create','data',oldSum,newSum,'Restored from backup');
+    meta.integrity = computeDigest(); meta.lastBackupAt = nowISO(); persistAll();
+    closeModal(); toast('Backup restored successfully'); navTo('dashboard');
+  }catch(e){ toast('Restore failed: '+((e&&e.message)||'wrong password?'),'error'); }
+}
+function runAutomaticIntegrity(){
+  const today=todayISO();
+  const res = checkIntegrity();
+  if(res.ok && meta.lastIntegrityDay===today) return;
+  if(!res.ok){ toast('⚠ Integrity check failed — data may be corrupted. Open Backup & Integrity for details.','error'); }
+  runManualIntegrity(true);
+}
+function runManualIntegrity(silent){
+  const res = checkIntegrity();
+  if(!res.ok){ meta.lastIntegrityDay = todayISO(); meta.lastIntegrityAt = nowISO(); saveMeta(); toast('Integrity check FAILED — data does not match its checksum.','error'); }
+  else { meta.integrity = res.digest; meta.lastIntegrityDay = todayISO(); meta.lastIntegrityAt = nowISO(); saveMeta(); if(!silent) toast('Integrity check passed — all records valid'); }
+  renderApp();
+}
+function downloadFile(filename, text){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text], {type:'application/json'}));
+  a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+}
+
+function viewSettings(){
+  const s=db.settings;
+  const J=juris();
+  const stateOpts = ['JK','DL','MH','KA','TN','UP','GJ','RJ','WB','KL','PB','HR','MP','AP','TS','BR','OR','AS','GA','HP','UK','CT','JH','AR','MN','ML','MZ','NL','TR','SK','LD','AN','PY','CH','DN'];
+  return `
+    ${pageTitle('Settings')}
+    <div class="grid g2">
+      <div>
+        <div class="card mb4"><div class="cardhead">Firm profile <span style="font-size:12px;color:#94a3b8;font-weight:400">(appears on invoices)</span></div><div class="cardbody">
+          ${field('Firm / '+solLabel()+' name *', `<input id="stName" class="input" value="${esc(s.firmName)}">`)}
+          ${field('Address', `<textarea id="stAddr" class="textarea">${esc(s.firmAddress)}</textarea>`)}
+          <div class="grid g2">${field(J.taxNoLabel, `<input id="stGstin" class="input" maxlength="20" value="${esc(s.firmGstin)}">`)}${J.statePick? field('State code', `<select id="stState" class="select">${stateOpts.map(x=>`<option ${s.firmState===x?'selected':''}>${x}</option>`).join('')}</select>`) : ''}</div>
+          <div class="grid g2">${field('Email', `<input id="stEmail" type="email" class="input" value="${esc(s.firmEmail)}">`)}${field('Phone', `<input id="stPhone" class="input" value="${esc(s.firmPhone)}">`)}</div>
+        </div></div>
+        <div class="card mb4"><div class="cardhead">Jurisdiction &amp; terminology</div><div class="cardbody">
+          ${field('Country', `<select id="stCountry" class="select" onchange="document.getElementById('otherRow').classList.toggle('hidden', this.value!=='OTHER')"><option value="IN" ${s.country==='IN'?'selected':''}>India</option><option value="US" ${s.country==='US'?'selected':''}>United States</option><option value="GB" ${s.country==='GB'?'selected':''}>United Kingdom</option><option value="OTHER" ${s.country==='OTHER'?'selected':''}>Other (custom)</option></select>`)}
+          <div id="otherRow" class="${s.country==='OTHER'?'':'hidden'}">
+            ${field('Role label (e.g. Solicitor / Advocate / Attorney)', `<input id="stRoleLabel" class="input" value="${esc(s.customSolicitorLabel)}">`)}
+            <div class="grid g3">${field('Tax label', `<input id="stTaxLabel" class="input" value="${esc(s.customTaxLabel)}">`)}${field('Tax No. label', `<input id="stTaxNoLabel" class="input" value="${esc(s.customTaxNoLabel)}">`)}${field('Currency code', `<input id="stCurrency" class="input" placeholder="INR / USD / GBP / EUR" value="${esc(s.customCurrency)}">`)}</div>
+          </div>
+          <p style="font-size:12px;color:#94a3b8;line-height:1.5">${J.code==='IN'?'India: roles are labelled “Advocate”, tax is GST with CGST+SGST / IGST and state code.':J.code==='US'?'USA: roles are labelled “Attorney”. No tax is applied by default (most U.S. states exempt legal services); the EIN/TIN field is shown on invoices.':J.code==='GB'?'UK: roles are labelled “Solicitor”. VAT (default 20%) is applied on invoices with a VAT registration number.':'Other: you define the role label, tax label, tax number label and currency. This is used across invoices and reports.'}</p>
+        </div></div>
+        <div class="card mb4"><div class="cardhead">Tax &amp; Client money settings</div><div class="cardbody">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><input type="checkbox" id="stTaxEnabled" style="accent-color:#0f172a;width:16px;height:16px" ${s.taxEnabled?'checked':''}><label for="stTaxEnabled" style="font-size:14px;font-weight:600">Enable ${esc(J.taxLabel)} invoicing</label></div>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:16px">When off, invoices are issued with no tax lines at all. When on, you can still opt out per-invoice in the builder.</p>
+          <div style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="stCMEnabled" style="accent-color:#0f172a;width:16px;height:16px" ${s.clientMoneyEnabled!==false?'checked':''}><label for="stCMEnabled" style="font-size:14px;font-weight:600">Enable client money ledger (3-way accounting)</label></div>
+          <p style="font-size:12px;color:#94a3b8;margin-top:8px">${esc(J.clientReg)}</p>
+        </div></div>
+      </div>
+      <div>
+        <div class="card mb4"><div class="cardhead"><span>${esc(solLabel())}s</span><button class="btn btn-light" style="padding:4px 12px" onclick="addSolicitor()">${icon('plus','sm')} Add</button></div><div class="cardbody">
+          ${s.solicitors.length? s.solicitors.map((name,i)=>`<div class="flex center gap2" style="background:#f8fafc;border-radius:12px;padding:10px 14px;margin-bottom:8px"><span style="flex:1;font-weight:500">${esc(name)}</span><button class="iconbtn" onclick="removeSolicitor(${i})">${icon('x','sm')}</button></div>`).join('') : `<p style="text-align:center;color:#94a3b8;font-size:14px;padding:16px">No ${esc(solLabel().toLowerCase())}s added. Time entries can still record any name.</p>`}
+          <p style="font-size:12px;color:#94a3b8;margin-top:8px">If you add exactly one, it becomes the default on new time entries.</p>
+          <button class="btn btn-dark" style="margin-top:12px" onclick="saveSettings()">${icon('save','sm')} Save all settings</button>
+        </div></div>
+        <div class="card mb4"><div class="cardhead">PIN security</div><div class="cardbody"><button class="btn btn-light" onclick="changePinModal()">${icon('key-round','sm')} Change PIN</button><p style="font-size:12px;color:#94a3b8;margin-top:8px">4–6 digits. After 5 wrong attempts the app locks for 30 seconds.</p></div></div>
+        <div class="card"><div class="cardhead">Data tools</div><div class="cardbody">
+          <button class="btn btn-light" style="width:100%;justify-content:center;margin-bottom:8px" onclick="loadSampleData()">${icon('flask-conical','sm')} Load sample data (demo)</button>
+          <button class="btn btn-light" style="width:100%;justify-content:center;background:#fef2f2;border-color:#fecaca;color:#b91c1c" onclick="wipeAllData()">${icon('trash-2','sm')} Erase all data</button>
+          <div style="background:#f8fafc;border-radius:12px;padding:12px;font-size:11px;color:#94a3b8;line-height:1.5;margin-top:12px">The app is fully offline. Data lives in this browser and optionally in a shared workspace file (Backup & Integrity). All changes are recorded in the immutable audit log.</div>
+        </div></div>
+      </div>
+    </div>`;
+}
+function saveSettings(){
+  const before=clone(db.settings);
+  db.settings.firmName=$('#stName').value.trim()||'Your Law Firm';
+  db.settings.firmAddress=$('#stAddr').value.trim();
+  db.settings.firmGstin=$('#stGstin').value.trim().toUpperCase();
+  if($('#stState')) db.settings.firmState=$('#stState').value;
+  db.settings.firmEmail=$('#stEmail').value.trim();
+  db.settings.firmPhone=$('#stPhone').value.trim();
+  if($('#stCountry')) db.settings.country=$('#stCountry').value;
+  if($('#stRoleLabel')) db.settings.customSolicitorLabel=$('#stRoleLabel').value.trim();
+  if($('#stTaxLabel')) db.settings.customTaxLabel=$('#stTaxLabel').value.trim();
+  if($('#stTaxNoLabel')) db.settings.customTaxNoLabel=$('#stTaxNoLabel').value.trim();
+  if($('#stCurrency')) db.settings.customCurrency=$('#stCurrency').value.trim().toUpperCase();
+  if($('#stTaxEnabled')) db.settings.taxEnabled=$('#stTaxEnabled').checked;
+  if($('#stCMEnabled')) db.settings.clientMoneyEnabled=$('#stCMEnabled').checked;
+  auditLogAdd('update','settings',before,db.settings,'Settings updated');
+  recordIntegrity(); saveDB(); renderApp(); toast('Settings saved');
+}
+function addSolicitor(){
+  const name=prompt(solLabel()+' name:');
+  if(name && name.trim()){ db.settings.solicitors.push(name.trim()); auditLogAdd('update','settings',clone(db.settings),clone(db.settings),'Added '+solLabel()+': '+name.trim()); recordIntegrity(); saveDB(); renderApp(); }
+}
+function removeSolicitor(i){ const n=db.settings.solicitors[i]; db.settings.solicitors.splice(i,1); auditLogAdd('update','settings',null,clone(db.settings),'Removed '+solLabel()+': '+n); recordIntegrity(); saveDB(); renderApp(); }
+function changePinModal(){
+  modal(` ${modalHeader('Change PIN')}
+    <div class="modalbody">
+      ${field('Current PIN', `<input id="opPin" type="password" inputmode="numeric" maxlength="6" class="input">`)}
+      ${field('New PIN (4–6 digits)', `<input id="npPin" type="password" inputmode="numeric" maxlength="6" class="input">`)}
+      ${field('Confirm new PIN', `<input id="npPin2" type="password" inputmode="numeric" maxlength="6" class="input">`)}
+    </div>
+    ${modalFooter('Cancel', `<button class="btn btn-dark" onclick="doChangePin()">Update PIN</button>`)}`);
+}
+function doChangePin(){
+  const op=$('#opPin').value, np=$('#npPin').value, np2=$('#npPin2').value;
+  if(pinHash(op)!==db.settings.pinHash){ toast('Current PIN is incorrect','error'); return; }
+  if(!/^\d{4,6}$/.test(np)){ toast('New PIN must be 4–6 digits','error'); return; }
+  if(np!==np2){ toast('New PINs do not match','error'); return; }
+  db.settings.pinHash = pinHash(np);
+  db.settings.pinLength = np.length;
+  auditLogAdd('update','settings',null,clone(db.settings),'PIN changed');
+  recordIntegrity(); saveDB(); closeModal(); toast('PIN updated');
+}
+function loadSampleData(){
+  if(!confirm('This adds demo clients, matters, time, expenses, invoices, payments and sample client money transactions. Continue?')) return;
+  const d=addDaysISO;
+  const c1={id:uid(), name:'Agarwal Traders Pvt Ltd', contactPerson:'Rohit Agarwal', phone:'+91 98100 12345', email:'rohit@agarwaltraders.in', gstin:'01AAACA1234A1Z5', address:'12, Nehru Place, New Delhi, DL 110019', createdAt:nowISO()};
+  const c2={id:uid(), name:'Mehta & Associates', contactPerson:'S. Mehta', email:'smehta@mehtaassoc.com', gstin:'', address:'5, Residency Road, Srinagar, JK 190001', createdAt:nowISO()};
+  db.clients.push(c1,c2);
+  const m1={id:uid(), clientId:c1.id, title:'Commercial lease review — Phase II', notes:'Review of lease deed for 3 office floors.', rateType:'hourly', hourlyRate:5000, fixedFee:0, status:'open', openDate:d(todayISO(),-45), closeDate:null, createdAt:nowISO()};
+  const m2={id:uid(), clientId:c2.id, title:'IP infringement defence', notes:'Defence against copyright infringement claim.', rateType:'hourly', hourlyRate:4500, fixedFee:0, status:'open', openDate:d(todayISO(),-30), closeDate:null, createdAt:nowISO()};
+  db.matters.push(m1,m2);
+  const T=(mid, daysAgo, mins, desc, sol, billable, rate, invoiced=false)=>{ db.timeEntries.push({id:uid(), matterId:mid, date:d(todayISO(),-daysAgo), startTime:null, endTime:null, minutes:mins, description:desc, solicitor:sol, billable, rateAtEntry:rate, invoiced, invoiceId:null, createdAt:nowISO()}); };
+  T(m1.id,2,180,'Drafting lease comments','Adv. Rohit Sharma',true,5000);
+  T(m1.id,5,120,'Client conference re: renewal terms','Adv. Priya Verma',true,5000);
+  T(m1.id,9,240,'Reviewing title documents','Adv. Rohit Sharma',true,5000);
+  T(m2.id,1,150,'Preparing written submissions','Adv. Priya Verma',true,4500);
+  T(m2.id,4,90,'Research on fair-use doctrine','Adv. Rohit Sharma',true,4500);
+  db.expenses.push({id:uid(), matterId:m1.id, date:d(todayISO(),-6), category:'Court fees', amount:1250, description:'Certified copies fee', billable:true, invoiced:false, invoiceId:null, createdAt:nowISO()});
+  if(clientMoneyOn()){
+    receiveClientMoney(c1.id, m1.id, 50000, 'UPI', 'Advance', d(todayISO(),-5));
+    receiveClientMoney(c2.id, m2.id, 25000, 'NEFT', 'Advance', d(todayISO(),-5));
+    transferToOffice(c1.id, m1.id, 20000, 'Earned fees', d(todayISO(),-2));
+  }
+  const invSub = round2(4*5000 + 1250);
+  const invTax = taxOn()? round2(invSub*0.18) : 0; const cgst=round2(invTax/2);
+  const inv1={id:uid(), number:`INV-${new Date().getFullYear()}-0001`, matterId:m1.id, clientId:c1.id, date:d(todayISO(),-4), dueDate:d(todayISO(),11), items:[{id:uid(), kind:'time', refId:db.timeEntries[2].id, desc:'Reviewing title documents (2d ago, 4h 00m)', amount:20000},{id:uid(), kind:'expense', refId:db.expenses[0].id, desc:'Certified copies fee (6d ago)', amount:1250}], taxRate:18, taxType:'cgst', taxEnabled:taxOn(), subtotal:invSub, cgst, sgst:round2(invTax-cgst), igst:0, vat:0, flatTax:0, total:round2(invSub+invTax), status:'issued', payments:[], createdAt:nowISO(), stale:false};
+  db.invoices.push(inv1);
+  db.timeEntries[2].invoiced=true; db.timeEntries[2].invoiceId=inv1.id;
+  db.expenses[0].invoiced=true; db.expenses[0].invoiceId=inv1.id;
+  db.seq.invoice=2; db.seq.receipt=1;
+  auditLogAdd('create','data',null,{clients:db.clients.length,matters:db.matters.length,entries:db.timeEntries.length,invoices:db.invoices.length},'Loaded sample data');
+  recordIntegrity(); saveDB(); navTo('dashboard'); toast('Sample data loaded — explore Client Money and Reports');
+}
+function wipeAllData(){
+  if(!confirm('Erase ALL data permanently? Export an encrypted backup first if in doubt.')) return;
+  if(!confirm('Are you absolutely sure? This cannot be undone.')) return;
+  const sum={clients:db.clients.length,matters:db.matters.length,entries:db.timeEntries.length,invoices:db.invoices.length};
+  const oldPin = (()=>{ try{ const o=JSON.parse(storeGet(DB_KEY)); return {pinHash:o.settings.pinHash||'', pinLength:(typeof o.settings.pinLength==='number')?o.settings.pinLength:4}; }catch(e){ return {pinHash:'', pinLength:6}; } })();
+  db = defaultDB(); db.settings.pinHash = oldPin.pinHash; db.settings.pinLength = oldPin.pinLength;
+  meta = defaultMeta(); meta.integrity=computeDigest(); persistAll();
+  auditLogAdd('delete','data',sum,null,'Erased all data');
+  recordIntegrity(); saveDB();
+  navTo('dashboard'); toast('All data erased','warn');
+}
+
+function inrWords(num){
+  num = Math.round((+num||0)*100)/100;
+  const J=juris();
+  const unit = J.code==='US' ? 'Dollar' : J.code==='GB' ? 'Pound' : J.code==='OTHER' ? 'Unit' : 'Rupee';
+  const unitPlural = unit==='Rupee'?'Rupees':unit==='Dollar'?'Dollars':unit==='Pound'?'Pounds':'Units';
+  const small = J.code==='US' ? 'Cent' : J.code==='GB' ? 'Penny' : J.code==='OTHER' ? 'Sub-unit' : 'Paise';
+  const smallPlural = small==='Paise'?'Paise':small==='Cent'?'Cents':small==='Penny'?'Pence':small+'s';
+  if(num===0) return 'Zero '+unitPlural;
+  const rupees = Math.floor(num);
+  const paise = Math.round((num-rupees)*100);
+  const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function two(n){ return n<20? ones[n] : (tens[Math.floor(n/10)] + (n%10? ' '+ones[n%10]:'')); }
+  function three(n){ const h=Math.floor(n/100), r=n%100; return (h? ones[h]+' Hundred'+(r?' ':'') : '') + (r? two(r):''); }
+  function words(n){
+    if(n===0) return '';
+    const crore=Math.floor(n/10000000), lakh=Math.floor((n%10000000)/100000), thousand=Math.floor((n%100000)/1000), rest=n%1000;
+    let out='';
+    if(crore) out+=words(crore)+' Crore ';
+    if(lakh) out+=two(lakh)+' Lakh ';
+    if(thousand) out+=two(thousand)+' Thousand ';
+    if(rest) out+=three(rest)+' ';
+    return out.trim();
+  }
+  let out = words(rupees) + (rupees===1?' '+unit:' '+unitPlural);
+  if(paise) out += ' and ' + two(paise) + (paise===1?' '+small:' '+smallPlural);
+  return out;
+}
+
+window.addEventListener('error', ev=>{
+  console.error(ev.error || ev.message);
+  const msg = ev.message || String(ev.error || ev);
+  const s = $('#splashStatus');
+  if(s){ s.textContent = 'Startup error: ' + msg; s.style.color = '#f87171'; }
+});
+window.addEventListener('unhandledrejection', ev=>{
+  const s = $('#splashStatus');
+  if(s){ s.textContent = 'Startup error: ' + String(ev.reason); s.style.color = '#f87171'; }
+});
+function init(){
+  splashStatus('Loading your data…');
+  loadMeta();
+  const hasDb = loadDB();
+  if(!hasDb){ db = defaultDB(); saveDB(); }
+  splashStatus(hasDb ? 'Opening LexTime…' : 'First run — create your PIN');
+  renderLockScreen();
+}
+function boot(){ try { init(); } catch(e){ console.error(e); splashStatus('Startup error: ' + (e && e.message ? e.message : e)); } }
+if(document.readyState === 'loading'){ window.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+</script>
+</body>
+</html>
